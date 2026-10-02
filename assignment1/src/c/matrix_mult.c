@@ -264,6 +264,9 @@ static int benchmark_size(int n, FILE *csv_out) {
     
     // Timed runs
     for (int rep = 0; rep < MIN_REPETITIONS; rep++) {
+        // Poner la memoria a cero fuera del temporizador
+        memset(C->data, 0, n * n * sizeof(double));
+        
         // Measure memory before
         double mem_before = get_memory_mb();
         

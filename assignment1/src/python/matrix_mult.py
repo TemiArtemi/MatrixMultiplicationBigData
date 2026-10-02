@@ -14,7 +14,7 @@ import random
 import psutil
 import argparse
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 # Try to import numpy for reference validation
 try:
@@ -54,25 +54,27 @@ def load_matrix_csv(filepath: Path) -> List[List[float]]:
     return matrix
 
 
-def multiply(A: List[List[float]], B: List[List[float]]) -> List[List[float]]:
-    """Basic triple-loop matrix multiplication: C = A × B."""
+def multiply(A: List[List[float]], B: List[List[float]], C: List[List[float]]) -> None:
+    """Basic triple-loop matrix multiplication: C = A × B.
+    
+    Modifies C in-place. C must be pre-allocated with correct dimensions.
+    """
     n = len(A)
-    C = [[0.0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
             s = 0.0
             for k in range(n):
                 s += A[i][k] * B[k][j]
             C[i][j] = s
-    return C
 
 
-def multiply_batch(A: List[List[float]], B: List[List[float]], batches: int) -> List[List[float]]:
-    """Run multiplication multiple times (for very small matrices) and return last result."""
-    C = None
+def multiply_batch(A: List[List[float]], B: List[List[float]], C: List[List[float]], batches: int) -> None:
+    """Run multiplication multiple times (for very small matrices).
+    
+    Modifies C in-place.
+    """
     for _ in range(batches):
-        C = multiply(A, B)
-    return C
+        multiply(A, B, C)
 
 
 def matrices_equal(A: List[List[float]], B: List[List[float]], abs_tol: float = ABS_TOL, rel_tol: float = REL_TOL) -> bool:
@@ -117,7 +119,8 @@ def validate_correctness() -> bool:
     n = 5
     A = [[rng.uniform(VALUE_MIN, VALUE_MAX) for _ in range(n)] for _ in range(n)]
     I = identity_matrix(n)
-    C = multiply(A, I)
+    C = [[0.0] * n for _ in range(n)]
+    multiply(A, I, C)
     if matrices_equal(C, A):
         print("   PASS: A × I = A")
     else:
@@ -127,7 +130,8 @@ def validate_correctness() -> bool:
     # Test 2: Zero matrix (A × 0 = 0)
     print("\n2. Testing with zero matrix...")
     Z = zero_matrix(n)
-    C = multiply(A, Z)
+    C = [[0.0] * n for _ in range(n)]
+    multiply(A, Z, C)
     expected = zero_matrix(n)
     if matrices_equal(C, expected):
         print("   PASS: A × 0 = 0")
@@ -140,7 +144,8 @@ def validate_correctness() -> bool:
     A_test = [[1.0, 2.0], [3.0, 4.0]]
     B_test = [[5.0, 6.0], [7.0, 8.0]]
     expected = [[19.0, 22.0], [43.0, 50.0]]
-    C = multiply(A_test, B_test)
+    C = [[0.0] * 2 for _ in range(2)]
+    multiply(A_test, B_test, C)
     if matrices_equal(C, expected):
         print("   PASS: 2×2 known result")
     else:
@@ -153,7 +158,8 @@ def validate_correctness() -> bool:
         n = 20
         A = [[rng.uniform(VALUE_MIN, VALUE_MAX) for _ in range(n)] for _ in range(n)]
         B = [[rng.uniform(VALUE_MIN, VALUE_MAX) for _ in range(n)] for _ in range(n)]
-        C = multiply(A, B)
+        C = [[0.0] * n for _ in range(n)]
+        multiply(A, B, C)
         
         A_np = np.array(A, dtype=np.float64)
         B_np = np.array(B, dtype=np.float64)
@@ -204,7 +210,7 @@ def benchmark_size(n: int) -> List[dict]:
     # Warm-up runs
     print(f"    Warm-up ({WARMUP_RUNS} runs)...")
     for _ in range(WARMUP_RUNS):
-        multiply(A, B)
+        multiply(A, B, C)
     
     # Determine if we need batching
     batches = BATCH_SIZES.get(n, 1)
@@ -218,9 +224,9 @@ def benchmark_size(n: int) -> List[dict]:
         # Time the kernel
         start = time.perf_counter()
         if batches > 1:
-            multiply_batch(A, B, batches)
+            multiply_batch(A, B, C, batches)
         else:
-            multiply(A, B)
+            multiply(A, B, C)
         end = time.perf_counter()
         
         # Measure memory after

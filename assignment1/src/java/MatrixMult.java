@@ -139,10 +139,10 @@ public class MatrixMult {
     
     /**
      * Basic triple-loop matrix multiplication: C = A × B.
+     * Modifies C in-place. C must be pre-allocated with correct dimensions.
      */
-    private static double[][] multiply(double[][] A, double[][] B) {
+    private static void multiply(double[][] A, double[][] B, double[][] C) {
         int n = A.length;
-        double[][] C = new double[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 double s = 0.0;
@@ -152,18 +152,16 @@ public class MatrixMult {
                 C[i][j] = s;
             }
         }
-        return C;
     }
     
     /**
-     * Run multiplication multiple times (for very small matrices) and return last result.
+     * Run multiplication multiple times (for very small matrices).
+     * Modifies C in-place.
      */
-    private static double[][] multiplyBatch(double[][] A, double[][] B, int batches) {
-        double[][] C = null;
+    private static void multiplyBatch(double[][] A, double[][] B, double[][] C, int batches) {
         for (int b = 0; b < batches; b++) {
-            C = multiply(A, B);
+            multiply(A, B, C);
         }
-        return C;
     }
     
     /**
@@ -218,7 +216,8 @@ public class MatrixMult {
         int n = 5;
         double[][] A = generateRandomMatrix(n, rng);
         double[][] I = identityMatrix(n);
-        double[][] C = multiply(A, I);
+        double[][] C = new double[n][n];
+        multiply(A, I, C);
         if (matricesEqual(C, A, ABS_TOL, REL_TOL)) {
             System.out.println("   PASS: A × I = A");
         } else {
@@ -229,7 +228,8 @@ public class MatrixMult {
         // Test 2: Zero matrix (A × 0 = 0)
         System.out.println("\n2. Testing with zero matrix...");
         double[][] Z = zeroMatrix(n);
-        C = multiply(A, Z);
+        C = new double[n][n];
+        multiply(A, Z, C);
         double[][] expected = zeroMatrix(n);
         if (matricesEqual(C, expected, ABS_TOL, REL_TOL)) {
             System.out.println("   PASS: A × 0 = 0");
@@ -243,7 +243,8 @@ public class MatrixMult {
         double[][] A_test = {{1.0, 2.0}, {3.0, 4.0}};
         double[][] B_test = {{5.0, 6.0}, {7.0, 8.0}};
         double[][] expected_test = {{19.0, 22.0}, {43.0, 50.0}};
-        C = multiply(A_test, B_test);
+        C = new double[2][2];
+        multiply(A_test, B_test, C);
         if (matricesEqual(C, expected_test, ABS_TOL, REL_TOL)) {
             System.out.println("   PASS: 2×2 known result");
         } else {
@@ -256,7 +257,8 @@ public class MatrixMult {
         n = 20;
         A = generateRandomMatrix(n, rng);
         double[][] B = generateRandomMatrix(n, rng);
-        C = multiply(A, B);
+        C = new double[n][n];
+        multiply(A, B, C);
         
         // Reference: different loop order (k, i, j) - should give same mathematical result
         double[][] C_ref = multiplyReference(A, B);
@@ -340,7 +342,7 @@ public class MatrixMult {
             // Warm-up runs
             System.out.println("    Warm-up (" + WARMUP_RUNS + " runs)...");
             for (int i = 0; i < WARMUP_RUNS; i++) {
-                multiply(A, B);
+                multiply(A, B, C);
             }
             
             // Force GC before timed runs
@@ -359,9 +361,9 @@ public class MatrixMult {
                 // Time the kernel
                 long start = System.nanoTime();
                 if (batches > 1) {
-                    multiplyBatch(A, B, batches);
+                    multiplyBatch(A, B, C, batches);
                 } else {
-                    multiply(A, B);
+                    multiply(A, B, C);
                 }
                 long end = System.nanoTime();
                 
