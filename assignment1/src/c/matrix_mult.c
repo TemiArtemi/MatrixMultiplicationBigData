@@ -12,8 +12,10 @@
 #include <windows.h>
 #include <psapi.h>
 
-// Link with psapi.lib for memory measurement
+// Link with psapi.lib for memory measurement (MSVC only)
+#ifdef _MSC_VER
 #pragma comment(lib, "psapi.lib")
+#endif
 
 // Configuration
 #define SEED 42
@@ -471,7 +473,7 @@ int main(int argc, char *argv[]) {
     fprintf(csv_out, "language,size,numeric_type,repetition,time_ms,memory_mb\n");
     
     // Run benchmarks
-    int *sizes = custom_sizes ? custom_sizes : SIZES;
+    const int *sizes = custom_sizes ? custom_sizes : SIZES;
     int count = custom_sizes ? custom_count : SIZES_COUNT;
     
     for (int i = 0; i < count; i++) {
