@@ -345,7 +345,7 @@ public class MatrixMult {
             
             // Force GC before timed runs
             System.gc();
-            Thread.sleep(100);
+            try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
             // Determine if we need batching
             int batches = BATCH_SIZES.getOrDefault(n, 1);
