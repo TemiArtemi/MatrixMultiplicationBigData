@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# C
+*.o
+*.out
+*.exe
+matrix_mult
+
+# Data files (optional - comment if you want to track)
+data/matrices/*.csv
+data/matrices/*.bin
+data/results/*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+build/
+dist/
