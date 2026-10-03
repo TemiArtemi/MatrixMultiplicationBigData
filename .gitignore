@@ -23,7 +23,7 @@ matrix_mult
 # Data files (optional - comment if you want to track)
 assignment*/data/matrices/*.csv
 assignment*/data/matrices/*.bin
-assignment*/data/results/*.csv
+# assignment*/data/results/*.csv
 
 # IDE
 .vscode/
