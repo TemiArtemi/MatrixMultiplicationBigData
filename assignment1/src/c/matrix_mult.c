@@ -2,6 +2,7 @@
  * Matrix multiplication benchmark - C implementation.
  * Implements basic O(n³) triple-loop matrix multiplication.
  * Reads matrices from CSV, measures kernel time and memory.
+ * Handles timeouts dynamically to avoid infinite execution on large matrices.
  */
 
 #include <stdio.h>
@@ -23,13 +24,14 @@
 #define VALUE_MAX 10.0
 #define SIZES_COUNT 11
 static const int SIZES[SIZES_COUNT] = {10, 50, 100, 200, 400, 800, 1000, 1500, 2000, 3000, 4000};
-#define MATRICES_DIR "data\\matrices"
-#define RESULTS_DIR "data\\results"
+
+// Updated directories
+#define MATRICES_DIR "assignment1\\data\\matrices"
+#define RESULTS_DIR "assignment1\\data\\results"
 
 // Benchmark settings
-#define WARMUP_RUNS 2
-#define MIN_REPETITIONS 5
-#define TIME_BUDGET_SECONDS 180
+#define WARMUP_RUNS 1
+#define TIME_BUDGET_SECONDS 600 // 10 minutes
 
 // Batch sizes for very small matrices
 static const struct { int size; int batches; } BATCH_SIZES[] = {
@@ -42,6 +44,13 @@ static const struct { int size; int batches; } BATCH_SIZES[] = {
 
 // Global RNG state
 static unsigned int rng_state = SEED;
+
+// Helper to get time in seconds as double
+static double get_time_sec() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + ts.tv_nsec / 1e9;
+}
 
 // Simple RNG (LCG) for reproducibility
 static double rand_double() {
@@ -119,9 +128,14 @@ static Matrix* load_matrix_csv(const char *filepath) {
 }
 
 // Basic triple-loop matrix multiplication: C = A × B
-static void multiply(const Matrix *A, const Matrix *B, Matrix *C) {
+// Returns 1 if completed, 0 if deadline exceeded
+static int multiply(const Matrix *A, const Matrix *B, Matrix *C, double deadline) {
     int n = A->n;
     for (int i = 0; i < n; i++) {
+        // Zero-overhead timeout check
+        if (deadline > 0.0 && get_time_sec() > deadline) {
+            return 0; // Timeout
+        }
         for (int j = 0; j < n; j++) {
             double s = 0.0;
             for (int k = 0; k < n; k++) {
@@ -130,13 +144,19 @@ static void multiply(const Matrix *A, const Matrix *B, Matrix *C) {
             matrix_set(C, i, j, s);
         }
     }
+    return 1;
 }
 
 // Run multiplication multiple times (for very small matrices)
-static void multiply_batch(const Matrix *A, const Matrix *B, Matrix *C, int batches) {
+static int multiply_batch(const Matrix *A, const Matrix *B, Matrix *C, int batches, double deadline) {
     for (int b = 0; b < batches; b++) {
-        multiply(A, B, C);
+        if (deadline > 0.0 && get_time_sec() > deadline) {
+            return 0;
+        }
+        // Inner call uses 0.0 to ensure zero overhead
+        multiply(A, B, C, 0.0);
     }
+    return 1;
 }
 
 // Check if two matrices are equal within tolerances
@@ -173,7 +193,6 @@ static Matrix* identity_matrix(int n) {
 static Matrix* zero_matrix(int n) {
     Matrix *m = matrix_alloc(n);
     if (!m) return NULL;
-    // calloc would be better but we use malloc + memset
     memset(m->data, 0, n * n * sizeof(double));
     return m;
 }
@@ -228,7 +247,9 @@ static int get_batch_size(int n) {
 
 // Benchmark a specific matrix size
 static int benchmark_size(int n, FILE *csv_out) {
-    printf("\n  Benchmarking n=%d (reps=%d, budget=%ds)...\n", n, MIN_REPETITIONS, TIME_BUDGET_SECONDS);
+    // 1. Repeticiones dinámicas
+    int reps_to_run = (n <= 800) ? 5 : 2;
+    printf("\n  Benchmarking n=%d (reps=%d, budget=%ds)...\n", n, reps_to_run, TIME_BUDGET_SECONDS);
     
     char a_path[256], b_path[256];
     snprintf(a_path, sizeof(a_path), "%s\\A_%d.csv", MATRICES_DIR, n);
@@ -253,40 +274,45 @@ static int benchmark_size(int n, FILE *csv_out) {
         return 0;
     }
     
-    // Warm-up runs
+    // 2. Warm-up runs with deadline
     printf("    Warm-up (%d runs)...\n", WARMUP_RUNS);
+    double warmup_start = get_time_sec();
+    double warmup_deadline = warmup_start + TIME_BUDGET_SECONDS;
+    
     for (int i = 0; i < WARMUP_RUNS; i++) {
-        multiply(A, B, C);
+        if (!multiply(A, B, C, warmup_deadline)) {
+            printf("    [TIMEOUT] Time limit exceeded during warm-up! Aborting size n=%d.\n", n);
+            matrix_free(A); matrix_free(B); matrix_free(C);
+            return 0;
+        }
     }
     
     // Determine if we need batching
     int batches = get_batch_size(n);
     
     // Timed runs
-    for (int rep = 0; rep < MIN_REPETITIONS; rep++) {
-        // Poner la memoria a cero fuera del temporizador
+    for (int rep = 0; rep < reps_to_run; rep++) {
+        // Clear memory outside timer to guarantee valid result
         memset(C->data, 0, n * n * sizeof(double));
         
         // Measure memory before
         double mem_before = get_memory_mb();
         
         // Time the kernel
-        struct timespec start, end;
-        clock_gettime(CLOCK_MONOTONIC, &start);
+        double start_t = get_time_sec();
         
         if (batches > 1) {
-            multiply_batch(A, B, C, batches);
+            multiply_batch(A, B, C, batches, 0.0);
         } else {
-            multiply(A, B, C);
+            multiply(A, B, C, 0.0);
         }
         
-        clock_gettime(CLOCK_MONOTONIC, &end);
+        double end_t = get_time_sec();
         
         // Measure memory after
         double mem_after = get_memory_mb();
         
-        double elapsed_ms = (end.tv_sec - start.tv_sec) * 1000.0 + 
-                           (end.tv_nsec - start.tv_nsec) / 1e6;
+        double elapsed_ms = (end_t - start_t) * 1000.0;
         if (batches > 1) {
             elapsed_ms /= batches;
         }
@@ -299,8 +325,8 @@ static int benchmark_size(int n, FILE *csv_out) {
         printf("    Rep %d: %.2f ms, memory delta: %.2f MB\n", rep + 1, elapsed_ms, memory_mb);
         
         // Check time budget
-        if (elapsed_ms > TIME_BUDGET_SECONDS * 1000) {
-            printf("    Time budget exceeded, stopping\n");
+        if ((end_t - start_t) > TIME_BUDGET_SECONDS) {
+            printf("    Time budget exceeded, stopping further repetitions for this size\n");
             break;
         }
     }
@@ -327,7 +353,8 @@ static int validate_correctness() {
     Matrix *I = identity_matrix(n);
     Matrix *C = matrix_alloc(n);
     
-    multiply(A, I, C);
+    // Use 0.0 to disable timeout during validation
+    multiply(A, I, C, 0.0);
     if (matrices_equal(C, A, ABS_TOL, REL_TOL)) {
         printf("   PASS: A x I = A\n");
     } else {
@@ -345,7 +372,7 @@ static int validate_correctness() {
     Matrix *Z = zero_matrix(n);
     C = matrix_alloc(n);
     
-    multiply(A, Z, C);
+    multiply(A, Z, C, 0.0);
     Matrix *expected = zero_matrix(n);
     if (matrices_equal(C, expected, ABS_TOL, REL_TOL)) {
         printf("   PASS: A x 0 = 0\n");
@@ -372,7 +399,7 @@ static int validate_correctness() {
     matrix_set(expected_test, 1, 0, 43.0); matrix_set(expected_test, 1, 1, 50.0);
     
     C = matrix_alloc(2);
-    multiply(A_test, B_test, C);
+    multiply(A_test, B_test, C, 0.0);
     if (matrices_equal(C, expected_test, ABS_TOL, REL_TOL)) {
         printf("   PASS: 2x2 known result\n");
     } else {
@@ -391,7 +418,7 @@ static int validate_correctness() {
     A = generate_random_matrix(n);
     Matrix *B = generate_random_matrix(n);
     C = matrix_alloc(n);
-    multiply(A, B, C);
+    multiply(A, B, C, 0.0);
     
     Matrix *C_ref = multiply_reference(A, B);
     if (matrices_equal(C, C_ref, ABS_TOL, REL_TOL)) {
@@ -411,7 +438,7 @@ static int validate_correctness() {
     } else {
         printf("SOME CORRECTNESS TESTS FAILED\n");
     }
-    printf("============================================================\n");
+    printf("\n============================================================\n");
     
     return all_passed;
 }
@@ -443,7 +470,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < SIZES_COUNT; i++) printf("%d ", SIZES[i]);
     printf("\n");
     printf("Warm-up runs: %d\n", WARMUP_RUNS);
-    printf("Repetitions: %d\n", MIN_REPETITIONS);
+    printf("Repetitions: 5 for n<=800, 2 for n>=1000\n");
     printf("Time budget: %ds per size\n", TIME_BUDGET_SECONDS);
     
     // Run correctness validation first

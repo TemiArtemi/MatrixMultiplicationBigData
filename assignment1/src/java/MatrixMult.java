@@ -17,13 +17,12 @@ public class MatrixMult {
     private static final double VALUE_MIN = -10.0;
     private static final double VALUE_MAX = 10.0;
     private static final int[] SIZES = {10, 50, 100, 200, 400, 800, 1000, 1500, 2000, 3000, 4000};
-    private static final String MATRICES_DIR = "data/matrices";
-    private static final String RESULTS_DIR = "data/results";
+    private static final String MATRICES_DIR = "assignment1/data/matrices";
+    private static final String RESULTS_DIR = "assignment1/data/results";
     
-    // Benchmark settings
+// Benchmark settings
     private static final int WARMUP_RUNS = 5;
-    private static final int MIN_REPETITIONS = 5;
-    private static final long TIME_BUDGET_NS = 180_000_000_000L; // 3 minutes in nanoseconds
+    private static final long TIME_BUDGET_NS = 600_000_000_000L; // 10 minutes in nanoseconds
     
     // Batch sizes for very small matrices (size -> batches)
     private static final Map<Integer, Integer> BATCH_SIZES = Map.of(
@@ -61,7 +60,7 @@ public class MatrixMult {
         System.out.println("Results directory: " + resultsPath.toAbsolutePath());
         System.out.println("Sizes: " + Arrays.toString(SIZES));
         System.out.println("Warm-up runs: " + WARMUP_RUNS);
-        System.out.println("Repetitions: " + MIN_REPETITIONS);
+        System.out.println("Repetitions: 5 for n<=800, 2 for n>=1000");
         System.out.println("Time budget: " + (TIME_BUDGET_NS / 1_000_000_000.0) + "s per size");
         System.out.println("Java version: " + System.getProperty("java.version"));
         System.out.println("Available processors: " + Runtime.getRuntime().availableProcessors());
@@ -140,10 +139,15 @@ public class MatrixMult {
     /**
      * Basic triple-loop matrix multiplication: C = A × B.
      * Modifies C in-place. C must be pre-allocated with correct dimensions.
+     * Returns true if completed successfully, false if deadline exceeded.
      */
-    private static void multiply(double[][] A, double[][] B, double[][] C) {
+    private static boolean multiply(double[][] A, double[][] B, double[][] C, long deadlineNs) {
         int n = A.length;
         for (int i = 0; i < n; i++) {
+            // Comprobación de tiempo en el bucle exterior (overhead cero)
+            if (deadlineNs > 0 && System.nanoTime() > deadlineNs) {
+                return false;
+            }
             for (int j = 0; j < n; j++) {
                 double s = 0.0;
                 for (int k = 0; k < n; k++) {
@@ -152,16 +156,21 @@ public class MatrixMult {
                 C[i][j] = s;
             }
         }
+        return true;
     }
     
     /**
      * Run multiplication multiple times (for very small matrices).
      * Modifies C in-place.
      */
-    private static void multiplyBatch(double[][] A, double[][] B, double[][] C, int batches) {
+    private static boolean multiplyBatch(double[][] A, double[][] B, double[][] C, int batches, long deadlineNs) {
         for (int b = 0; b < batches; b++) {
-            multiply(A, B, C);
+            if (deadlineNs > 0 && System.nanoTime() > deadlineNs) {
+                return false;
+            }
+            multiply(A, B, C, 0L);
         }
+        return true;
     }
     
     /**
@@ -217,7 +226,7 @@ public class MatrixMult {
         double[][] A = generateRandomMatrix(n, rng);
         double[][] I = identityMatrix(n);
         double[][] C = new double[n][n];
-        multiply(A, I, C);
+        multiply(A, I, C, 0L);
         if (matricesEqual(C, A, ABS_TOL, REL_TOL)) {
             System.out.println("   PASS: A × I = A");
         } else {
@@ -229,7 +238,7 @@ public class MatrixMult {
         System.out.println("\n2. Testing with zero matrix...");
         double[][] Z = zeroMatrix(n);
         C = new double[n][n];
-        multiply(A, Z, C);
+        multiply(A, Z, C, 0L);
         double[][] expected = zeroMatrix(n);
         if (matricesEqual(C, expected, ABS_TOL, REL_TOL)) {
             System.out.println("   PASS: A × 0 = 0");
@@ -244,7 +253,7 @@ public class MatrixMult {
         double[][] B_test = {{5.0, 6.0}, {7.0, 8.0}};
         double[][] expected_test = {{19.0, 22.0}, {43.0, 50.0}};
         C = new double[2][2];
-        multiply(A_test, B_test, C);
+        multiply(A_test, B_test, C, 0L);
         if (matricesEqual(C, expected_test, ABS_TOL, REL_TOL)) {
             System.out.println("   PASS: 2×2 known result");
         } else {
@@ -258,7 +267,7 @@ public class MatrixMult {
         A = generateRandomMatrix(n, rng);
         double[][] B = generateRandomMatrix(n, rng);
         C = new double[n][n];
-        multiply(A, B, C);
+        multiply(A, B, C, 0L);
         
         // Reference: different loop order (k, i, j) - should give same mathematical result
         double[][] C_ref = multiplyReference(A, B);
@@ -322,7 +331,8 @@ public class MatrixMult {
      * Benchmark a specific matrix size.
      */
     private static List<Result> benchmarkSize(int n) {
-        System.out.println("\n  Benchmarking n=" + n + " (reps=" + MIN_REPETITIONS + ", budget=" + (TIME_BUDGET_NS / 1_000_000_000.0) + "s)...");
+        int repsToRun = (n <= 800) ? 5 : 2;
+        System.out.println("\n  Benchmarking n=" + n + " (reps=" + repsToRun + ", budget=" + (TIME_BUDGET_NS / 1_000_000_000.0) + "s)...");
         
         Path aPath = Paths.get(MATRICES_DIR, "A_" + n + ".csv");
         Path bPath = Paths.get(MATRICES_DIR, "B_" + n + ".csv");
@@ -341,35 +351,37 @@ public class MatrixMult {
             
             // Warm-up runs
             System.out.println("    Warm-up (" + WARMUP_RUNS + " runs)...");
+            long warmupStart = System.nanoTime();
+            long warmupDeadline = warmupStart + TIME_BUDGET_NS;
+            
             for (int i = 0; i < WARMUP_RUNS; i++) {
-                multiply(A, B, C);
+                boolean completed = multiply(A, B, C, warmupDeadline);
+                if (!completed) {
+                    System.out.println("    [TIMEOUT] Time limit exceeded during warm-up! Aborting size n=" + n + ".");
+                    return List.of();
+                }
             }
             
             // Force GC before timed runs
             System.gc();
             try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             
-            // Determine if we need batching
             int batches = BATCH_SIZES.getOrDefault(n, 1);
+            List<Result> results = new ArrayList<>();
             
             // Timed runs
-            List<Result> results = new ArrayList<>();
-            for (int rep = 0; rep < MIN_REPETITIONS; rep++) {
-                // Measure memory before
+            for (int rep = 0; rep < repsToRun; rep++) {
                 double memBefore = getMemoryMB();
                 
-                // Time the kernel
                 long start = System.nanoTime();
                 if (batches > 1) {
-                    multiplyBatch(A, B, C, batches);
+                    multiplyBatch(A, B, C, batches, 0L);
                 } else {
-                    multiply(A, B, C);
+                    multiply(A, B, C, 0L);
                 }
                 long end = System.nanoTime();
                 
-                // Measure memory after
                 double memAfter = getMemoryMB();
-                
                 double elapsedMs = (end - start) / 1_000_000.0;
                 if (batches > 1) {
                     elapsedMs /= batches;
@@ -377,13 +389,10 @@ public class MatrixMult {
                 
                 double memoryMb = Math.max(memAfter - memBefore, 0);
                 
-                Result result = new Result("Java", n, "float64", rep + 1, elapsedMs, memoryMb);
-                results.add(result);
+                results.add(new Result("Java", n, "float64", rep + 1, elapsedMs, memoryMb));
                 
-                System.out.printf("    Rep %d: %.2f ms, memory delta: %.2f MB%n", 
-                    rep + 1, elapsedMs, memoryMb);
+                System.out.printf(Locale.US, "    Rep %d: %.2f ms, memory delta: %.2f MB%n", rep + 1, elapsedMs, memoryMb);
                 
-                // Check time budget
                 if ((end - start) > TIME_BUDGET_NS) {
                     System.out.println("    Time budget exceeded, stopping");
                     break;
