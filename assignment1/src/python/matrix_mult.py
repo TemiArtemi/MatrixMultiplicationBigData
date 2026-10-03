@@ -34,23 +34,11 @@ MATRICES_DIR = Path(__file__).parent.parent.parent / "data" / "matrices"
 RESULTS_DIR = Path(__file__).parent.parent.parent / "data" / "results"
 
 # Benchmark settings
-WARMUP_RUNS = 2
-MIN_REPETITIONS = 5
-TIME_BUDGET_SECONDS = 180  # 3 minutes per configuration (for n <= 800)
-
-# For large matrices (n >= 1000): fewer repetitions, more time
-LARGE_SIZE_THRESHOLD = 1000
-LARGE_MIN_REPETITIONS = 2
-LARGE_TIME_BUDGET_SECONDS = 300  # 5 minutes per configuration
+WARMUP_RUNS = 1
+MIN_REPETITIONS = 2
+TIME_BUDGET_SECONDS = 600  # 10 minutes per configuration
 
 BATCH_SIZES = {10: 1000, 50: 100, 100: 10}  # sizes -> batches for very small matrices
-
-
-def get_benchmark_params(n: int) -> tuple[int, int]:
-    """Get (repetitions, time_budget_seconds) for a given size."""
-    if n >= LARGE_SIZE_THRESHOLD:
-        return LARGE_MIN_REPETITIONS, LARGE_TIME_BUDGET_SECONDS
-    return MIN_REPETITIONS, TIME_BUDGET_SECONDS
 
 # Tolerances for correctness
 ABS_TOL = 1e-9
@@ -204,9 +192,7 @@ def get_memory_mb() -> float:
 
 def benchmark_size(n: int) -> List[dict]:
     """Run benchmark for a specific matrix size."""
-    # Get dynamic parameters based on size
-    min_reps, time_budget = get_benchmark_params(n)
-    print(f"\n  Benchmarking n={n} (reps={min_reps}, budget={time_budget}s)...")
+    print(f"\n  Benchmarking n={n} (reps={MIN_REPETITIONS}, budget={TIME_BUDGET_SECONDS}s)...")
     
     # Load matrices
     a_path = MATRICES_DIR / f"A_{n}.csv"
@@ -223,7 +209,7 @@ def benchmark_size(n: int) -> List[dict]:
     C = [[0.0] * n for _ in range(n)]
     
     # Warm-up runs
-    print(f"    Warm-up ({WARMUP_RUNS} runs)...")
+    print(f"    Warm-up ({WARMUP_RUNS} run)...")
     for _ in range(WARMUP_RUNS):
         multiply(A, B, C)
     
@@ -232,7 +218,7 @@ def benchmark_size(n: int) -> List[dict]:
     
     # Timed runs
     results = []
-    for rep in range(min_reps):
+    for rep in range(MIN_REPETITIONS):
         # Measure memory before
         mem_before = get_memory_mb()
         
@@ -265,8 +251,8 @@ def benchmark_size(n: int) -> List[dict]:
         print(f"    Rep {rep + 1}: {elapsed_ms:.2f} ms, memory delta: {memory_mb:.2f} MB")
         
         # Check time budget
-        if elapsed_ms > time_budget * 1000:
-            print(f"    Time budget exceeded ({time_budget}s), stopping")
+        if elapsed_ms > TIME_BUDGET_SECONDS * 1000:
+            print(f"    Time budget exceeded ({TIME_BUDGET_SECONDS}s), stopping")
             break
     
     return results
@@ -285,8 +271,8 @@ def main():
     print(f"Results directory: {RESULTS_DIR}")
     print(f"Sizes: {SIZES}")
     print(f"Warm-up runs: {WARMUP_RUNS}")
-    print(f"Min repetitions: {MIN_REPETITIONS} (n<{LARGE_SIZE_THRESHOLD}), {LARGE_MIN_REPETITIONS} (n>={LARGE_SIZE_THRESHOLD})")
-    print(f"Time budget: {TIME_BUDGET_SECONDS}s per size (n<{LARGE_SIZE_THRESHOLD}), {LARGE_TIME_BUDGET_SECONDS}s (n>={LARGE_SIZE_THRESHOLD})")
+    print(f"Repetitions: {MIN_REPETITIONS}")
+    print(f"Time budget: {TIME_BUDGET_SECONDS}s per size")
     
     # Run correctness validation first
     if not validate_correctness():

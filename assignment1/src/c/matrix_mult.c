@@ -31,26 +31,10 @@ static const int SIZES[SIZES_COUNT] = {10, 50, 100, 200, 400, 800, 1000, 1500, 2
 #define MIN_REPETITIONS 5
 #define TIME_BUDGET_SECONDS 180
 
-// For large matrices (n >= 1000): fewer repetitions, more time
-#define LARGE_SIZE_THRESHOLD 1000
-#define LARGE_MIN_REPETITIONS 2
-#define LARGE_TIME_BUDGET_SECONDS 300
-
 // Batch sizes for very small matrices
 static const struct { int size; int batches; } BATCH_SIZES[] = {
     {10, 1000}, {50, 100}, {100, 10}
 };
-
-// Get benchmark parameters for a given size
-static void get_benchmark_params(int n, int *out_min_reps, int *out_time_budget) {
-    if (n >= LARGE_SIZE_THRESHOLD) {
-        *out_min_reps = LARGE_MIN_REPETITIONS;
-        *out_time_budget = LARGE_TIME_BUDGET_SECONDS;
-    } else {
-        *out_min_reps = MIN_REPETITIONS;
-        *out_time_budget = TIME_BUDGET_SECONDS;
-    }
-}
 
 // Tolerances for correctness
 #define ABS_TOL 1e-9
@@ -244,10 +228,7 @@ static int get_batch_size(int n) {
 
 // Benchmark a specific matrix size
 static int benchmark_size(int n, FILE *csv_out) {
-    int min_reps, time_budget;
-    get_benchmark_params(n, &min_reps, &time_budget);
-    
-    printf("\n  Benchmarking n=%d (reps=%d, budget=%ds)...\n", n, min_reps, time_budget);
+    printf("\n  Benchmarking n=%d (reps=%d, budget=%ds)...\n", n, MIN_REPETITIONS, TIME_BUDGET_SECONDS);
     
     char a_path[256], b_path[256];
     snprintf(a_path, sizeof(a_path), "%s\\A_%d.csv", MATRICES_DIR, n);
@@ -282,7 +263,7 @@ static int benchmark_size(int n, FILE *csv_out) {
     int batches = get_batch_size(n);
     
     // Timed runs
-    for (int rep = 0; rep < min_reps; rep++) {
+    for (int rep = 0; rep < MIN_REPETITIONS; rep++) {
         // Poner la memoria a cero fuera del temporizador
         memset(C->data, 0, n * n * sizeof(double));
         
@@ -318,7 +299,7 @@ static int benchmark_size(int n, FILE *csv_out) {
         printf("    Rep %d: %.2f ms, memory delta: %.2f MB\n", rep + 1, elapsed_ms, memory_mb);
         
         // Check time budget
-        if (elapsed_ms > time_budget * 1000) {
+        if (elapsed_ms > TIME_BUDGET_SECONDS * 1000) {
             printf("    Time budget exceeded, stopping\n");
             break;
         }
@@ -462,10 +443,8 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < SIZES_COUNT; i++) printf("%d ", SIZES[i]);
     printf("\n");
     printf("Warm-up runs: %d\n", WARMUP_RUNS);
-    printf("Min repetitions: %d (n<%d), %d (n>=%d)\n", 
-           MIN_REPETITIONS, LARGE_SIZE_THRESHOLD, LARGE_MIN_REPETITIONS, LARGE_SIZE_THRESHOLD);
-    printf("Time budget: %ds (n<%d), %ds (n>=%d)\n",
-           TIME_BUDGET_SECONDS, LARGE_SIZE_THRESHOLD, LARGE_TIME_BUDGET_SECONDS, LARGE_SIZE_THRESHOLD);
+    printf("Repetitions: %d\n", MIN_REPETITIONS);
+    printf("Time budget: %ds per size\n", TIME_BUDGET_SECONDS);
     
     // Run correctness validation first
     if (!validate_correctness()) {

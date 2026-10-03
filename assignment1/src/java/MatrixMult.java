@@ -25,11 +25,6 @@ public class MatrixMult {
     private static final int MIN_REPETITIONS = 5;
     private static final long TIME_BUDGET_NS = 180_000_000_000L; // 3 minutes in nanoseconds
     
-    // For large matrices (n >= 1000): fewer repetitions, more time
-    private static final int LARGE_SIZE_THRESHOLD = 1000;
-    private static final int LARGE_MIN_REPETITIONS = 2;
-    private static final long LARGE_TIME_BUDGET_NS = 300_000_000_000L; // 5 minutes in nanoseconds
-    
     // Batch sizes for very small matrices (size -> batches)
     private static final Map<Integer, Integer> BATCH_SIZES = Map.of(
         10, 1000,
@@ -42,17 +37,6 @@ public class MatrixMult {
     private static final double REL_TOL = 1e-9;
     
     private static final MemoryMXBean MEMORY_BEAN = ManagementFactory.getMemoryMXBean();
-    
-    /**
-     * Get benchmark parameters for a given size.
-     * @return array of [minRepetitions, timeBudgetNs]
-     */
-    private static long[] getBenchmarkParams(int n) {
-        if (n >= LARGE_SIZE_THRESHOLD) {
-            return new long[]{LARGE_MIN_REPETITIONS, LARGE_TIME_BUDGET_NS};
-        }
-        return new long[]{MIN_REPETITIONS, TIME_BUDGET_NS};
-    }
     
     public static void main(String[] args) throws Exception {
         boolean validateOnly = false;
@@ -77,8 +61,8 @@ public class MatrixMult {
         System.out.println("Results directory: " + resultsPath.toAbsolutePath());
         System.out.println("Sizes: " + Arrays.toString(SIZES));
         System.out.println("Warm-up runs: " + WARMUP_RUNS);
-        System.out.println("Min repetitions: " + MIN_REPETITIONS + " (n<" + LARGE_SIZE_THRESHOLD + "), " + LARGE_MIN_REPETITIONS + " (n>=" + LARGE_SIZE_THRESHOLD + ")");
-        System.out.println("Time budget: " + (TIME_BUDGET_NS / 1_000_000_000.0) + "s (n<" + LARGE_SIZE_THRESHOLD + "), " + (LARGE_TIME_BUDGET_NS / 1_000_000_000.0) + "s (n>=" + LARGE_SIZE_THRESHOLD + ")");
+        System.out.println("Repetitions: " + MIN_REPETITIONS);
+        System.out.println("Time budget: " + (TIME_BUDGET_NS / 1_000_000_000.0) + "s per size");
         System.out.println("Java version: " + System.getProperty("java.version"));
         System.out.println("Available processors: " + Runtime.getRuntime().availableProcessors());
         
@@ -338,11 +322,7 @@ public class MatrixMult {
      * Benchmark a specific matrix size.
      */
     private static List<Result> benchmarkSize(int n) {
-        long[] params = getBenchmarkParams(n);
-        int minReps = (int) params[0];
-        long timeBudgetNs = params[1];
-        
-        System.out.println("\n  Benchmarking n=" + n + " (reps=" + minReps + ", budget=" + (timeBudgetNs / 1_000_000_000.0) + "s)...");
+        System.out.println("\n  Benchmarking n=" + n + " (reps=" + MIN_REPETITIONS + ", budget=" + (TIME_BUDGET_NS / 1_000_000_000.0) + "s)...");
         
         Path aPath = Paths.get(MATRICES_DIR, "A_" + n + ".csv");
         Path bPath = Paths.get(MATRICES_DIR, "B_" + n + ".csv");
@@ -374,7 +354,7 @@ public class MatrixMult {
             
             // Timed runs
             List<Result> results = new ArrayList<>();
-            for (int rep = 0; rep < minReps; rep++) {
+            for (int rep = 0; rep < MIN_REPETITIONS; rep++) {
                 // Measure memory before
                 double memBefore = getMemoryMB();
                 
@@ -404,7 +384,7 @@ public class MatrixMult {
                     rep + 1, elapsedMs, memoryMb);
                 
                 // Check time budget
-                if ((end - start) > timeBudgetNs) {
+                if ((end - start) > TIME_BUDGET_NS) {
                     System.out.println("    Time budget exceeded, stopping");
                     break;
                 }
