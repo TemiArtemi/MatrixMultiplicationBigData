@@ -38,6 +38,7 @@ public class MatrixMult {
     private static final MemoryMXBean MEMORY_BEAN = ManagementFactory.getMemoryMXBean();
     
     public static void main(String[] args) throws Exception {
+        Locale.setDefault(Locale.US);
         boolean validateOnly = false;
         List<Integer> sizesToTest = new ArrayList<>();
         
