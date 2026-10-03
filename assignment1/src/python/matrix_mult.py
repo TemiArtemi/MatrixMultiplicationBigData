@@ -4,6 +4,7 @@ Matrix multiplication benchmark - Python implementation.
 
 Implements basic O(n³) triple-loop matrix multiplication.
 Reads matrices from CSV, measures kernel time and memory.
+Handles timeouts dynamically to avoid infinite execution on large matrices.
 """
 
 import os
@@ -35,7 +36,6 @@ RESULTS_DIR = Path(__file__).parent.parent.parent / "data" / "results"
 
 # Benchmark settings
 WARMUP_RUNS = 1
-MIN_REPETITIONS = 2
 TIME_BUDGET_SECONDS = 600  # 10 minutes per configuration
 
 BATCH_SIZES = {10: 1000, 50: 100, 100: 10}  # sizes -> batches for very small matrices
@@ -55,27 +55,38 @@ def load_matrix_csv(filepath: Path) -> List[List[float]]:
     return matrix
 
 
-def multiply(A: List[List[float]], B: List[List[float]], C: List[List[float]]) -> None:
+def multiply(A: List[List[float]], B: List[List[float]], C: List[List[float]], deadline: float = None) -> bool:
     """Basic triple-loop matrix multiplication: C = A × B.
     
     Modifies C in-place. C must be pre-allocated with correct dimensions.
+    Returns True if completed successfully, False if deadline was exceeded.
     """
     n = len(A)
     for i in range(n):
+        # Check time limit only at row level (near zero overhead)
+        if deadline is not None and time.perf_counter() > deadline:
+            return False
+            
         for j in range(n):
             s = 0.0
             for k in range(n):
                 s += A[i][k] * B[k][j]
             C[i][j] = s
+            
+    return True
 
 
-def multiply_batch(A: List[List[float]], B: List[List[float]], C: List[List[float]], batches: int) -> None:
+def multiply_batch(A: List[List[float]], B: List[List[float]], C: List[List[float]], batches: int, deadline: float = None) -> bool:
     """Run multiplication multiple times (for very small matrices).
     
     Modifies C in-place.
     """
     for _ in range(batches):
-        multiply(A, B, C)
+        if deadline is not None and time.perf_counter() > deadline:
+            return False
+        # Inner call does not need deadline check since small matrices are instant
+        multiply(A, B, C, deadline=None)
+    return True
 
 
 def matrices_equal(A: List[List[float]], B: List[List[float]], abs_tol: float = ABS_TOL, rel_tol: float = REL_TOL) -> bool:
@@ -192,7 +203,10 @@ def get_memory_mb() -> float:
 
 def benchmark_size(n: int) -> List[dict]:
     """Run benchmark for a specific matrix size."""
-    print(f"\n  Benchmarking n={n} (reps={MIN_REPETITIONS}, budget={TIME_BUDGET_SECONDS}s)...")
+    # 1. Adjust repetitions dynamically: 5 up to n=800, 2 for n>=1000
+    reps_to_run = 5 if n <= 800 else 2
+    
+    print(f"\n  Benchmarking n={n} (reps={reps_to_run}, budget={TIME_BUDGET_SECONDS}s)...")
     
     # Load matrices
     a_path = MATRICES_DIR / f"A_{n}.csv"
@@ -208,26 +222,35 @@ def benchmark_size(n: int) -> List[dict]:
     # Pre-allocate result matrix (outside timing)
     C = [[0.0] * n for _ in range(n)]
     
-    # Warm-up runs
+    # 2. Warm-up run with strict deadline timer
     print(f"    Warm-up ({WARMUP_RUNS} run)...")
+    warmup_start = time.perf_counter()
+    warmup_deadline = warmup_start + TIME_BUDGET_SECONDS
+    
     for _ in range(WARMUP_RUNS):
-        multiply(A, B, C)
+        completed = multiply(A, B, C, deadline=warmup_deadline)
+        if not completed:
+            print(f"    [TIMEOUT] Time limit ({TIME_BUDGET_SECONDS}s) exceeded during warm-up! Aborting size n={n}.")
+            return []
+            
+    warmup_time = time.perf_counter() - warmup_start
+    print(f"    Warm-up took: {warmup_time:.2f} s")
     
     # Determine if we need batching
     batches = BATCH_SIZES.get(n, 1)
     
     # Timed runs
     results = []
-    for rep in range(MIN_REPETITIONS):
+    for rep in range(reps_to_run):
         # Measure memory before
         mem_before = get_memory_mb()
         
-        # Time the kernel
+        # Time the kernel (deadline=None ensures zero overhead during measurement)
         start = time.perf_counter()
         if batches > 1:
-            multiply_batch(A, B, C, batches)
+            multiply_batch(A, B, C, batches, deadline=None)
         else:
-            multiply(A, B, C)
+            multiply(A, B, C, deadline=None)
         end = time.perf_counter()
         
         # Measure memory after
@@ -250,9 +273,9 @@ def benchmark_size(n: int) -> List[dict]:
         
         print(f"    Rep {rep + 1}: {elapsed_ms:.2f} ms, memory delta: {memory_mb:.2f} MB")
         
-        # Check time budget
-        if elapsed_ms > TIME_BUDGET_SECONDS * 1000:
-            print(f"    Time budget exceeded ({TIME_BUDGET_SECONDS}s), stopping")
+        # Check time budget to stop further repetitions
+        if (elapsed_ms / 1000) > TIME_BUDGET_SECONDS:
+            print(f"    Time budget exceeded ({TIME_BUDGET_SECONDS}s), stopping further repetitions for this size")
             break
     
     return results
@@ -271,7 +294,7 @@ def main():
     print(f"Results directory: {RESULTS_DIR}")
     print(f"Sizes: {SIZES}")
     print(f"Warm-up runs: {WARMUP_RUNS}")
-    print(f"Repetitions: {MIN_REPETITIONS}")
+    print(f"Repetitions: 5 for n<=800, 2 for n>=1000")
     print(f"Time budget: {TIME_BUDGET_SECONDS}s per size")
     
     # Run correctness validation first
