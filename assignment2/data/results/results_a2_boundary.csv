@@ -1,0 +1,2 @@
+assignment,method,language,n,numeric_type,seed,warmup_runs,repetition_id,threads_or_workers,density,execution_time_ms,memory_metric_name,memory_value_mb,checksum,status,nnz_A,nnz_B,nnz_C,block_size,theoretical_storage_mb
+2,dense_ijk_baseline,C,4000,float64,42,1,0,1,100.0000,,peak_rss_working_set_mb,265.734,-2.523164e+04,TIMEOUT,16000000,16000000,16000000,,366.2109

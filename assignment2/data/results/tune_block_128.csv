@@ -1,9 +1,9 @@
 assignment,method,language,n,numeric_type,seed,warmup_runs,repetition_id,threads_or_workers,density,execution_time_ms,memory_metric_name,memory_value_mb,checksum,status,nnz_A,nnz_B,nnz_C,block_size,theoretical_storage_mb
-2,dense_blocked,C,1500,float64,42,1,0,1,100.0000,1122.4320,peak_rss_working_set_mb,56.492,-3.739174e+04,OK,2250000,2250000,2250000,128,51.4984
-2,dense_blocked,C,1500,float64,42,1,1,1,100.0000,1107.2892,peak_rss_working_set_mb,56.500,-3.739174e+04,OK,2250000,2250000,2250000,128,51.4984
-2,dense_blocked,C,1500,float64,42,1,2,1,100.0000,1111.7799,peak_rss_working_set_mb,56.500,-3.739174e+04,OK,2250000,2250000,2250000,128,51.4984
-2,dense_blocked,C,1500,float64,42,1,3,1,100.0000,1130.5713,peak_rss_working_set_mb,56.500,-3.739174e+04,OK,2250000,2250000,2250000,128,51.4984
-2,dense_blocked,C,2000,float64,42,1,0,1,100.0000,2597.2216,peak_rss_working_set_mb,96.555,3.111663e+04,OK,4000000,4000000,4000000,128,91.5527
-2,dense_blocked,C,2000,float64,42,1,1,1,100.0000,2662.0175,peak_rss_working_set_mb,96.555,3.111663e+04,OK,4000000,4000000,4000000,128,91.5527
-2,dense_blocked,C,2000,float64,42,1,2,1,100.0000,2623.0211,peak_rss_working_set_mb,96.555,3.111663e+04,OK,4000000,4000000,4000000,128,91.5527
-2,dense_blocked,C,2000,float64,42,1,3,1,100.0000,2629.2796,peak_rss_working_set_mb,96.555,3.111663e+04,OK,4000000,4000000,4000000,128,91.5527
+2,dense_blocked,C,1500,float64,42,1,0,1,100.0000,1108.2906,peak_rss_working_set_mb,56.465,-3.426838e+04,OK,2250000,2250000,2250000,128,51.4984
+2,dense_blocked,C,1500,float64,42,1,1,1,100.0000,956.7190,peak_rss_working_set_mb,56.473,-3.426838e+04,OK,2250000,2250000,2250000,128,51.4984
+2,dense_blocked,C,1500,float64,42,1,2,1,100.0000,1787.8272,peak_rss_working_set_mb,56.473,-3.426838e+04,OK,2250000,2250000,2250000,128,51.4984
+2,dense_blocked,C,1500,float64,42,1,3,1,100.0000,1727.3888,peak_rss_working_set_mb,56.473,-3.426838e+04,OK,2250000,2250000,2250000,128,51.4984
+2,dense_blocked,C,2000,float64,42,1,0,1,100.0000,4363.3209,peak_rss_working_set_mb,96.527,3.093357e+04,OK,4000000,4000000,4000000,128,91.5527
+2,dense_blocked,C,2000,float64,42,1,1,1,100.0000,4096.0755,peak_rss_working_set_mb,96.527,3.093357e+04,OK,4000000,4000000,4000000,128,91.5527
+2,dense_blocked,C,2000,float64,42,1,2,1,100.0000,4076.4552,peak_rss_working_set_mb,96.527,3.093357e+04,OK,4000000,4000000,4000000,128,91.5527
+2,dense_blocked,C,2000,float64,42,1,3,1,100.0000,4054.3222,peak_rss_working_set_mb,96.527,3.093357e+04,OK,4000000,4000000,4000000,128,91.5527
