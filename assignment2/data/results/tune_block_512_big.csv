@@ -1,0 +1,9 @@
+assignment,method,language,n,numeric_type,seed,warmup_runs,repetition_id,threads_or_workers,density,execution_time_ms,memory_metric_name,memory_value_mb,checksum,status,nnz_A,nnz_B,nnz_C,block_size,theoretical_storage_mb
+2,dense_blocked,C,2000,float64,42,1,0,1,100.0000,2101.8316,peak_rss_working_set_mb,96.551,3.111663e+04,OK,4000000,4000000,4000000,512,91.5527
+2,dense_blocked,C,2000,float64,42,1,1,1,100.0000,2095.3854,peak_rss_working_set_mb,96.559,3.111663e+04,OK,4000000,4000000,4000000,512,91.5527
+2,dense_blocked,C,2000,float64,42,1,2,1,100.0000,2224.4316,peak_rss_working_set_mb,96.559,3.111663e+04,OK,4000000,4000000,4000000,512,91.5527
+2,dense_blocked,C,2000,float64,42,1,3,1,100.0000,2106.4379,peak_rss_working_set_mb,96.559,3.111663e+04,OK,4000000,4000000,4000000,512,91.5527
+2,dense_blocked,C,3000,float64,42,1,0,1,100.0000,6971.4580,peak_rss_working_set_mb,211.004,-3.957232e+04,OK,9000000,9000000,9000000,512,205.9937
+2,dense_blocked,C,3000,float64,42,1,1,1,100.0000,6957.4738,peak_rss_working_set_mb,211.004,-3.957232e+04,OK,9000000,9000000,9000000,512,205.9937
+2,dense_blocked,C,3000,float64,42,1,2,1,100.0000,6948.0870,peak_rss_working_set_mb,211.004,-3.957232e+04,OK,9000000,9000000,9000000,512,205.9937
+2,dense_blocked,C,3000,float64,42,1,3,1,100.0000,6935.6100,peak_rss_working_set_mb,210.961,-3.957232e+04,OK,9000000,9000000,9000000,512,205.9937
