@@ -90,7 +90,7 @@ inside the harness (see “Experimental configuration”).
 # 1. Correctness gate (always runs before any measurement; also standalone):
 assignment2\src\c\a2_bench.exe --validate-only
 
-# 2. Full experiment (Part A + Part B), ~20-25 min on the reference machine:
+# 2. Full experiment (Part A + Part B), ~13-17 min on the reference machine:
 assignment2\src\c\a2_bench.exe --part all
 
 # 2a. Parts separately (useful while iterating):
@@ -168,12 +168,15 @@ NumPy cross-check (`scripts/verify_numpy.py`).
 
 ## Declared budgets and limits
 
-- **Memory budget:** 8 GiB (the largest tested configuration, $n = 3000$
-  dense, needs ≈ 216 MiB of matrix storage; no OOM was observed).
+- **Memory budget:** 8 GiB (the largest completed configuration, $n = 3000$
+  dense, needs ≈ 216 MB of matrix storage, i.e. 3 × 8n² bytes; the attempted
+  $n = 4000$ needs ≈ 384 MB; no OOM was observed).
 - **Time budget:** 120 s per measured run (user-declared cap). The largest
-  *tested* size is $n = 3000$ for every Part A method; the largest
-  *attempted* size is $n = 4000$ with the baseline kernel, which exceeds the
-  cap (≈ 294 s in Assignment 1) and is recorded as a `TIMEOUT` outcome.
+  *completed* size is $n = 3000$ for the optimised Part A methods but only
+  $n = 2000$ for the baseline (its $n = 3000$ warm-up hits the watchdog);
+  the largest *attempted* size is $n = 4000$ with the baseline kernel, which
+  exceeds the cap (≈ 294 s in Assignment 1) and is recorded as a `TIMEOUT`
+  outcome.
 
 ## Reproducing the report
 

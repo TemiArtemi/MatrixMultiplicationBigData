@@ -39,12 +39,15 @@ warm-up run, five measured repetitions, a monotonic kernel-only timer, a
 per-run watchdog of 120\,s and a named peak-resident-memory metric; medians
 and interquartile ranges (IQR) are reported and every raw measurement is
 published. \emph{Main findings:} (i) both optimisations reduce kernel time at
-large $n$ by up to a factor of several, with the gap widening as the working
-set exceeds the last-level cache; (ii) the CSR product is orders of
-magnitude faster than dense multiplication only at low density, and its
-advantage collapses as fill-in densifies the product; (iii) the same
-sparsity that saves time also inverts the memory advantage once the product
-nnz approaches $n^2$. Conclusions are scoped to the tested hardware,
+large $n$---by $10.8\times$ ($i$-$k$-$j$) and $18.1\times$ (blocking) at
+$n = 2000$, with the gap widening as the working set exceeds the last-level
+cache; (ii) the CSR product ranges from $\approx 1.5\times10^{4}$ faster
+than dense multiplication at $0.1\%$ density
+to $1.7\times$ slower at $n = 200$, $50\%$ density, so the sparse advantage is
+governed by $n$ and density jointly through the output fill-in; (iii) the
+sparse storage advantage shrinks from $\approx 300\times$ to exact parity
+as the product densifies, but it never reverses at the tested densities.
+Conclusions are scoped to the tested hardware,
 implementations and inputs.
 \end{abstract}
 
@@ -96,7 +99,8 @@ format for sparse inputs.
 
 \subsection{Dense multiplication and data locality}
 The straight-line triple loop computes
-$C_{ij} = \sum_{k} A_{ik} B_{kj}$ in $\Theta(n^3)$ arithmetic work. The
+$C_{ij} = \sum_{k} A_{ik} B_{kj}$ in $\Theta(n^3)$ arithmetic work
+\cite{horn2013}. The
 loop \emph{order} does not change the operation count but changes which
 elements are touched while they remain in cache. With the $i$-$j$-$k$ order
 the innermost loop reads $A$ contiguously but $B$ column-wise (stride $n$),
@@ -209,13 +213,17 @@ of each representation is also reported (dense: $3\times 8n^2$ bytes;
 sparse: CSR of $A$, $B$ and $C$ plus the $O(n)$ workspace). Sampled RSS and
 analytic storage are different quantities and are never equated.
 
-\textbf{Declared budgets.} Memory: 8\,GiB (largest configuration needs
-$\approx 216$\,MiB of matrices; no OOM occurred). Time: $120$\,s per run.
-The largest \emph{tested} size is $n = 3000$ for all Part A methods; the
-largest \emph{attempted} size is $n = 4000$ with the baseline kernel
-($\approx 294$\,s per run in Assignment 1), which is expected to hit the
-watchdog and is reported as a TIMEOUT outcome in
-Table~\ref{tab:dense-time}.
+\textbf{Declared budgets.} Memory: 8\,GiB (the largest completed
+configuration, $n = 3000$, needs $\approx 216$\,MB for $A$, $B$ and $C$;
+the attempted $n = 4000$ needs $\approx 384$\,MB; no OOM occurred).
+Time: $120$\,s per run.
+The largest \emph{completed} size differs per method because of this cap:
+both optimised methods finish $n = 3000$, while the baseline's largest
+completed size is $n = 2000$ and its $n = 3000$ warm-up is aborted by the
+watchdog (recorded as TIMEOUT). The largest \emph{attempted} size is
+$n = 4000$ with the baseline kernel ($\approx 294$\,s per run in Assignment
+1), recorded as a \texttt{TIMEOUT} outcome in
+\texttt{data/results/results\_a2\_boundary.csv} without an execution time.
 
 \subsection{Correctness}
 The harness refuses to benchmark unless the correctness gate passes:
@@ -226,22 +234,48 @@ densities; and sparse identity/zero products. Tolerances:
 $\epsilon_{\text{abs}} = \epsilon_{\text{rel}} = 10^{-9}$ for these tests.
 At benchmark scale the harness compares the full result matrices of all
 executed methods (maximum absolute difference logged in
-\texttt{crosscheck\_log\_*\_csv}); for $n \le 3000$ the worst-case
+\texttt{crosscheck\_log\_*.csv}); for $n \le 3000$ the worst-case
 accumulation error $n\,\epsilon_{\text{mach}}\,|C|_{\max} < 10^{-6}$, so
 cross-checks use $\epsilon_{\text{abs}} = 10^{-6}$. A dumped baseline
 result is additionally verified against \texttt{numpy.matmul} by
 \texttt{scripts/verify\_numpy.py} (NumPy is used only as a trusted
-reference, never as a benchmarked method).
+reference, never as a benchmarked method): at $n = 100$ the maximum
+absolute difference is $6.82\times10^{-13}$ (PASS;
+\texttt{data/results/numpy\_crosscheck\_log.txt}).
 
 % =====================================================================
 \section{Results}\label{sec:results}
 
 All numbers below are computed by \texttt{scripts/analyze\_results.py} from
 the raw CSVs in \texttt{data/results/}; every figure shows medians with
-IQR-based variability. Table~\ref{tab:dense-time} and
+IQR-based variability. Memory values use the $2^{20}$-byte megabyte
+convention of the harness. Table~\ref{tab:dense-time} and
 Fig.~\ref{fig:dense-time} report the Part A kernel times,
 Table~\ref{tab:dense-speedup} and Fig.~\ref{fig:dense-speedup} the
 resulting speedups.
+
+\subsection{Part A: dense optimisation}
+
+Part A produces a clean, size-dependent ordering of the three kernels.
+For $n \le 100$ all three kernels run within $\approx 0.03$\,ms of each
+other (every median is $\le 0.3$\,ms): the working sets fit in cache and
+the traversal order is irrelevant. From $n = 200$ the
+optimised kernels are consistently faster ($1.35$--$1.73\times$ up to
+$n = 800$) and the gap grows with $n$
+(Table~\ref{tab:dense-speedup}): at $n = 1000$ the medians are
+$\approx 982$, $434$ and $464$\,ms ($\approx 2.3\times$ and
+$2.1\times$); at $n = 1500$, $\approx 4.19$, $1.72$ and $1.45$\,s
+($2.4\times$ and $2.9\times$); at
+$n = 2000$, $\approx 31.9$\,s (baseline), $2.96$\,s ($i$-$k$-$j$) and
+$1.76$\,s (blocking)---$10.8\times$ and $18.1\times$ (these two ratios
+are the least stable in the study: the baseline times at this size are
+bimodal, see the anomalies note in the Discussion). At $n = 3000$ the
+baseline warm-up exceeded the declared $120$\,s
+watchdog and the configuration is recorded as \texttt{TIMEOUT} (its
+largest completed size is therefore $n = 2000$), while $i$-$k$-$j$
+needed $\approx 21.7$\,s and blocking $\approx 11.6$\,s. The single
+baseline attempt at $n = 4000$ (largest \emph{attempted} size) was
+likewise aborted by the watchdog and carries no invented time.
 
 \input{tables/table_dense_time}
 \begin{figure}[t]
@@ -269,12 +303,71 @@ resulting speedups.
     \label{fig:memory-dense}
 \end{figure}
 
+Memory behaves as predicted: all dense kernels allocate exactly the same
+arrays and Fig.~\ref{fig:memory-dense} shows the sampled peak RSS tracking
+the analytic $3\times 8n^2$ bytes at every $n$ (plus $\approx 6$\,MiB of
+process overhead). The visible steps upward come from the harness's second
+output copy used for the cross-method validation, which is resident from
+the second method of each size onwards: $97$\,MiB for the baseline vs.\
+$128$\,MiB for both optimised methods at $n = 2000$, and $212$\,MiB vs.\
+$280$\,MiB at $n = 3000$ (where the baseline timed out before that copy
+was created). No optimisation trades memory for speed.
+
 Part B is summarised in Table~\ref{tab:sparse-time} (times, speedup and
 conversion cost), Table~\ref{tab:fill-in} with
 Fig.~\ref{fig:fill-in} (output fill-in vs.\ the analytical model),
 Table~\ref{tab:memory-partb} with Fig.~\ref{fig:memory-sparse} (memory),
 and Figs.~\ref{fig:sparse-time}--\ref{fig:sparse-speedup} (time and
 speedup vs.\ density).
+
+\subsection{Part B: sparse CSR vs.\ the best dense method}
+
+Table~\ref{tab:sparse-time} summarises the 27 sparse configurations
+(kernel times, conversion cost and speedup). Five observations:
+
+\begin{enumerate}
+    \item \emph{The sparse advantage grows with $n$ and falls with
+    density.} At $d = 0.1\%$ the sparse kernel is up to $\approx
+    1.5\times10^{4}$ times faster than the dense kernel ($0.23$\,ms vs.\
+    $3.42$\,s at $n = 2000$; $\approx 1.0\times10^{4}$ at $n = 3000$);
+    at $d = 1\%$ the factor is $57$--$88\times$ depending on $n$.
+    \item \emph{Break-even.} At $n = 200$ the sparse kernel loses to the
+    dense kernel down to $d = 10\%$ ($0.6\times$ at $50\%$: $3.15$ vs.\
+    $1.82$\,ms; $0.6\times$ at $20\%$; $0.8\times$ at $10\%$) and wins
+    from $d = 5\%$ down ($1.8\times$ at $5\%$, $58\times$ at $1\%$,
+    $408\times$ at $0.1\%$), i.e., the break-even sits at $\approx
+    5$--$10\%$ density at this size (every $n = 200$ kernel median is
+    $\approx 2$\,ms, i.e., in the noise regime discussed below). From
+    $n = 500$ upward it is faster at \emph{every} tested
+    density, including $d = 50\%$ (e.g., $n = 2000$: $2.20$\,s vs.\
+    $3.41$\,s, $1.6\times$; at $n = 500$ the margin is only
+    $1.1\times$).
+    \item \emph{Conversion} is measured separately and never mixed into
+    the kernel comparison: across all configurations it ranges from
+    $0.07$\,ms ($n = 200$, $d = 0.1\%$) to $300.6$\,ms ($n = 2000$,
+    $d = 50\%$). At the lowest densities it exceeds the sparse kernel
+    itself ($46\times$ at $n = 2000$, $d = 0.1\%$), yet the end-to-end
+    sparse path (conversion $+$ kernel) still beats the dense kernel by
+    $\approx 323\times$ there.
+    \item \emph{Fill-in} (Table~\ref{tab:fill-in},
+    Fig.~\ref{fig:fill-in}): the measured $nnz_C$ tracks the
+    independent-Bernoulli prediction $1-(1-d^2)^n$ closely: the maximum
+    deviation of the output density over all $27$ configurations is
+    $0.77$\,percentage points ($n = 200$, $d = 10\%$), and most points
+    are far closer (e.g., $n = 1000$, $d = 5\%$: $91.9\%$ measured vs.\
+    $91.8\%$ model). The relevant predictor of the output density is
+    $nd^2$, not $d$ alone.
+    \item \emph{Memory} (Table~\ref{tab:memory-partb},
+    Fig.~\ref{fig:memory-sparse}): the theoretical storage of
+    CSR($A$, $B$, $C$) never exceeds the dense $3\times 8n^2$ at the
+    tested densities: it is \emph{exactly} equal at $d = 50\%$ (fill-in
+    makes $C$ dense, so $12(0.5 + 0.5 + 1)n^2 = 24n^2 = 3\times 8n^2$)
+    and smaller everywhere else ($0.70\times$ at $d = 20\%$, $0.10\times$
+    at $d = 1\%$, and $\approx 300\times$ smaller at $d = 0.1\%$ for
+    $n = 2000$). The sampled peak RSS column is a process-wide bound
+    (see the limitations below) and is reported for
+    completeness, not as a per-representation measure.
+\end{enumerate}
 
 \input{tables/table_sparse}
 \begin{figure}[t]
@@ -315,8 +408,149 @@ speedup vs.\ density).
 % =====================================================================
 \section{Discussion}
 
+\subsection{RQ1: what the two dense optimisations actually buy}
+The evidence supports both hypotheses with the predicted shape. The
+$i$-$k$-$j$ reorder changes only the traversal, yet it is $\approx
+1.4$--$2.4\times$ faster from $n = 200$ to $n = 1500$ and $10.8\times$ at
+$n = 2000$: the innermost loop streams rows of $B$ and $C$ with unit
+stride, which the hardware prefetcher and the vectoriser can exploit,
+whereas the baseline reads $B$ column-wise (stride $n$) and suffers one
+cache miss per element once $A{+}B{+}C$ exceeds the last-level cache
+($33$\,MB on this CPU: the working set is $\approx 24$\,MB at $n = 1000$
+but $\approx 96$\,MB at $n = 2000$). Blocking adds panel reuse of $B$
+across a block of rows, which is why it ties plain $i$-$k$-$j$ within
+$\approx 10\%$ while everything fits in cache ($n \le 1000$) but is
+$1.7\times$
+faster at $n = 2000$ and $1.9\times$ at $n = 3000$. The tuning sweep
+(Table~\ref{tab:block-tuning}) shows a clear clustering: at
+$n = 2000$--$3000$ the blocks $b \in \{256, 512, 1024\}$ agree within
+$\approx 10\%$, while blocks $b \le 128$ are $1.4$--$2.3\times$ slower
+(e.g., $b = 64$: $5199$ vs.\ $2251$\,ms at $n = 2000$); the sweep is
+itself noisy at $n = 1500$ ($b = 32$: $900$\,ms vs.\ $b = 64$:
+$2122$\,ms), consistent with the core-migration anomaly discussed below.
+We therefore select $b = 512$ as a representative of the best cluster
+rather than claiming a precise optimum, and we do not claim it
+generalises to other CPUs. Memory is unaffected by either
+optimisation, as required for a clean time comparison. H1 and H2 are
+confirmed within the tested scope.
+
+\subsection{RQ2: where the sparse representation wins---and where it does not}
+The percentage of zeros alone never determines performance; the outcomes
+depend on $n$, on the \emph{output} structure and on whether conversion is
+counted:
+
+\begin{itemize}
+    \item \emph{Work reduction, not storage, explains the high-density
+    wins.} At $d = 50\%$ the product is completely filled by fill-in
+    ($nnz_C = n^2$ at every tested $n$), so the sparse kernel has no
+    storage advantage; it still wins for $n \ge 500$ ($1.1$--$1.6\times$)
+    because Gustavson performs only the necessary
+    $\mathrm{nnz}_A \cdot \overline{\mathrm{nnz\ row\ of\ B}} \approx
+    0.125\,n^3$ multiply-accumulates instead of the dense $n^3$, and
+    writes $C$ row by row. The per-row linked-list traversal and sorting
+    are what make it lose at the smallest size ($n = 200$: $1.7\times$
+    slower at $d = 50\%$ and slower down to $d = 10\%$, winning only
+    from $d = 5\%$ down).
+    \item \emph{Fill-in erodes, but never reverses, the storage
+    advantage.} CSR($C$) costs $12$ bytes per non-zero, i.e.\ $1.5\times$
+    the $8$ bytes of dense $C$, yet $A$ and $B$ become proportionally
+    cheaper in CSR as $d$ falls: total CSR($A,B,C$) storage equals the
+    dense $3\times 8n^2$ only at $d = 50\%$ (fill-in makes $C$ dense, so
+    $12(0.5 + 0.5 + 1)n^2 = 24n^2$) and is smaller at every lower tested
+    density ($0.70\times$ at $20\%$, $0.10\times$ at $1\%$, and
+    $\approx 300\times$ at $0.1\%$ for $n = 2000$). H4's first part
+    (storage scales with $nnz$) is confirmed; its prediction that CSR
+    storage \emph{exceeds} the dense layout at high density is refuted
+    within the tested range---that would require $d > 50\%$.
+    \item \emph{Conversion decides one-shot pipelines.} For repeated
+    products of the same matrices, the separately measured conversion is a
+    one-off cost and the sparse kernel dominates. For a single
+    multiplication the conversion must be added: it is negligible against
+    the dense kernel at all tested points, but it exceeds the sparse
+    kernel itself at the lowest densities (absolute cost still small:
+    $10.4$\,ms vs.\ $0.23$\,ms at $n = 2000$, $d = 0.1\%$).
+\end{itemize}
+H3 is only partially confirmed: its first clause (large wins only at low
+density) holds, but the predicted \emph{direction} of the break-even
+density versus $n$ is refuted---the measured break-even \emph{increases}
+with $n$ ($\approx 5$--$10\%$ at $n = 200$, above $50\%$ from $n = 500$ on),
+because the dense cost grows as $n^3$ while the sparse cost grows as
+$d^2 n^3$ and the fixed sparse overheads matter only at small $n$. The
+fill-in mechanism H3 invoked manifests in storage (H4, partially
+confirmed as detailed above) rather than in time.
+
+\subsection{Anomalies and limitations}
+\begin{itemize}
+    \item \emph{Run-to-run bimodality:} some configurations show two
+    distinct time levels separated by a $\approx 1.4$--$2.1\times$ factor
+    (baseline at $n = 2000$: $15.6$--$33.3$\,s; the dense kernel at
+    $n = 500$ in Part B: $25.5$--$53.7$\,ms). The most plausible cause is
+    the hybrid CPU architecture ($8$ performance + $12$ efficiency cores)
+    of the laptop: the single-threaded process is not pinned to a core
+    type, so Windows may migrate it between runs. Thread counts were
+    controlled, core \emph{type} was not. Medians and IQRs are reported;
+    the qualitative conclusions rely on ratios $\ge 2\times$ that exceed
+    this noise. Affinity pinning is planned for Assignment 3.
+    \item \emph{Memory sampling:} the $5$\,ms RSS sampler cannot resolve
+    peaks shorter than one sampling period; memory figures for the
+    sub-millisecond configurations ($n \le 100$) are indicative only.
+    Sampled RSS and analytic storage are different quantities and are
+    reported separately, never equated. In addition, the Part B peak RSS
+    of a kernel is a \emph{process-wide} bound: during cross-validation
+    the harness holds both the dense and the CSR copies of the data at
+    once, and the allocator retains pages freed by earlier configurations
+    of the same run (visible as the dense RSS growing across densities at
+    a fixed $n$ in Table~\ref{tab:memory-partb}). Per-representation
+    comparisons therefore use the theoretical storage columns only.
+    \item \emph{Scope:} one machine, one compiler, one input family
+    (uniform random values; random independent sparsity). Structured
+    sparsity (banded, block, power-law) can produce very different fill-in
+    and is out of scope. Part B dense baselines consume the same logical
+    sparse inputs stored densely: they do not exploit sparsity, which is
+    precisely the controlled contrast, not a defect. The $n = 4000$
+    boundary was attempted only with the baseline kernel.
+\end{itemize}
+
 % =====================================================================
 \section{Conclusions}
+
+Within the tested scope (single-threaded C, float64, one laptop CPU,
+$i$-$j$-$k$-baseline inputs reused from Assignment 1 and randomly sparse
+inputs for Part B):
+
+\begin{enumerate}
+    \item \textbf{RQ1:} both optimisations reduce kernel time with zero
+    memory cost and identical arithmetic. $i$-$k$-$j$ reordering yields
+    $\approx 1.4$--$2.4\times$ up to $n = 1500$ and
+    $10.8\times$ at $n = 2000$; cache blocking matches it within
+    $\approx 10\%$ below $n = 1000$
+    and adds a further $1.7$--$1.9\times$ at $n = 2000$--$3000$, for a
+    total of $18.1\times$ over the baseline at $n = 2000$ (the least
+    stable ratio in the study, see the bimodality note). The block size
+    must be tuned per microarchitecture ($b = 512$ here, a representative
+    of the best cluster $b \in \{256, 512, 1024\}$; blocks $b \le 128$
+    lose $1.4$--$2.3\times$ at $n = 2000$). Under the declared $120$\,s budget the baseline
+    cannot complete $n = 3000$ (TIMEOUT) while the blocked kernel needs
+    only $\approx 11.6$\,s.
+    \item \textbf{RQ2:} the custom CSR/Gustavson product is advantageous
+    over a wide tested range: break-even against the best dense kernel
+    lies at $\approx 5$--$10\%$ density at $n = 200$, but from
+    $n = 500$ on the sparse kernel wins at every tested density---up to
+    $\approx 1.5\times10^{4}$ at $n = 2000$, $d = 0.1\%$---even when
+    fill-in makes the product fully dense (work reduction, not storage).
+    The zeros percentage alone predicts nothing: the output density
+    follows $1-(1-d^2)^n$, measured within $0.8$\,percentage points, and
+    CSR storage shrinks relative to dense storage as the product fills
+    in---exactly matching it at $d = 50\%$ and never exceeding it at the
+    tested densities. Conversion cost is negligible against the dense
+    kernel at every tested point but dominates the sparse kernel at the
+    lowest densities; it should be counted for one-shot multiplications.
+\end{enumerate}
+
+Open questions carried to Assignment 3: how these gains interact with
+thread-level parallelism (does blocking still pay once cores share the
+LLC?), whether affinity pinning removes the observed bimodality, and how
+parallel sparse products behave under fill-in.
 
 % =====================================================================
 \begin{thebibliography}{9}

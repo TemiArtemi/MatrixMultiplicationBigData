@@ -51,6 +51,11 @@ def main() -> None:
     total_ram_gb = powershell(
         "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB,1)"
     )
+    llc_mb = powershell(
+        "[math]::Round(((Get-CimInstance Win32_CacheMemory | "
+        "Where-Object Level -EQ 5 | "
+        "Measure-Object -Property MaxCacheSize -Maximum).Maximum)/1KB,0)"
+    )
 
     gcc_version = run_cmd(["gcc", "--version"])
     python_version = platform.python_version()
@@ -64,6 +69,7 @@ def main() -> None:
         f"| CPU model | {cpu_model} |",
         f"| Physical cores | {physical_cores} |",
         f"| Logical processors | {logical_cpus} |",
+        f"| Last-level cache (L3) | {llc_mb} MB |",
         f"| Total RAM | {total_ram_gb} GB |",
         f"| Operating system | {os_version} |",
         f"| C compiler | {gcc_version} |",
@@ -97,6 +103,7 @@ def main() -> None:
         r"\midrule",
         f"CPU model & {esc(cpu_model)} \\\\",
         f"Physical cores / logical processors & {physical_cores} / {logical_cpus} \\\\",
+        f"Last-level cache (L3) & {llc_mb}~MB \\\\",
         f"Total RAM & {total_ram_gb}~GB \\\\",
         f"Operating system & {esc(os_version)} \\\\",
         f"C compiler & {esc(gcc_version)} \\\\",
