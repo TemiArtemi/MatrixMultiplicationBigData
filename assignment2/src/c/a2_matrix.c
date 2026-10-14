@@ -64,13 +64,19 @@ DenseMatrix *dm_load_csv(const char *path) {
 
     while (fgets(line, (int)cap, f)) {
         if (n == 0) {
+            /* Count fields of the first line: commas + 1 (trailing newline
+             * and carriage return are stripped before testing emptiness). */
+            int commas = 0;
             char *p = line;
             while (*p) {
-                if (*p == ',') cols++;
+                if (*p == ',') commas++;
                 p++;
             }
-            cols += (p > line && p[-1] != '\n' && p[-1] != ',' && p[-1] != '\r') ? 1 : 0;
-            if (cols == 0) cols = 1;
+            int len = (int)(p - line);
+            while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r')) {
+                len--;
+            }
+            cols = (len > 0) ? commas + 1 : 0;
         }
         n++;
     }

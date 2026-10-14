@@ -77,16 +77,16 @@ static void csv_row(FILE *f, const char *method, int n, int rep_id,
             g_warmups, rep_id, density_pct);
     if (strcmp(status, "OK") == 0) {
         fprintf(f, "%.4f", time_ms);
-    } else {
-        fprintf(f, ","); /* no invented time for aborted runs */
     }
+    /* TIMEOUT: write nothing; the trailing comma of the previous field
+     * already leaves execution_time_ms empty (no invented time). */
     fprintf(f, ",%s,%.3f,%.6e,%s,%lld,%lld,%lld,", MEM_METRIC, peak_mb,
             checksum, status, nnz_a, nnz_b, nnz_c);
     if (block > 0) {
         fprintf(f, "%d", block);
-    } else {
-        fprintf(f, ",");
     }
+    /* block == 0: write nothing; the previous trailing comma already
+     * leaves block_size empty. */
     fprintf(f, ",%.4f\n", storage_mb);
     fflush(f);
 }
@@ -394,9 +394,12 @@ static void run_part_b(FILE *out) {
                 }
             }
 
-            /* -- 2) Dense -> CSR conversion, timed separately. */
+            /* -- 2) Dense -> CSR conversion, timed separately.
+             * Same repetition protocol as every other configuration:
+             * g_warmups rows with repetition_id = 0 (excluded from the
+             * statistics) followed by g_reps measured rows. */
             double conv_storage_mb = 0.0;
-            for (int rep = 0; rep < g_reps; rep++) {
+            for (int rep = 0; rep < g_warmups + g_reps; rep++) {
                 double t0 = a2_time_sec();
                 CSRMatrix *ta = csr_from_dense(A);
                 CSRMatrix *tb = csr_from_dense(B);
@@ -414,9 +417,9 @@ static void run_part_b(FILE *out) {
                         (t1 - t0) * 1000.0, mem_current_rss_mb(),
                         (double)(ta->nnz + tb->nnz), "OK", nnz_a, nnz_b,
                         dense_nnz_c, 0, conv_storage_mb);
-                if (rep == 0) {
-                    printf("   dense_to_csr_conv     rep 1: OK (%.2f ms)\n",
-                           (t1 - t0) * 1000.0);
+                if (rep == g_warmups) {
+                    printf("   dense_to_csr_conv     rep %d: OK (%.2f ms)\n",
+                           rep, (t1 - t0) * 1000.0);
                 }
                 csr_free(Sa);
                 csr_free(Sb);
@@ -619,6 +622,14 @@ int main(int argc, char *argv[]) {
            "Block size: %d\n",
            g_warmups, g_reps, g_budget, g_block_size);
 
+    /* Matrix search path: explicit dir, then Assignment 2, then Assignment 1
+     * (reused dataset). Must be ready before any load, including dumps. */
+    if (user_matrices_dir) {
+        g_matrix_dirs[g_matrix_dirs_count++] = user_matrices_dir;
+    }
+    g_matrix_dirs[g_matrix_dirs_count++] = A2_MATRICES_DIR_A2;
+    g_matrix_dirs[g_matrix_dirs_count++] = A2_MATRICES_DIR_A1;
+
     /* Correctness gate: always first, always mandatory. */
     if (!a2_validate_all()) {
         printf("Correctness validation FAILED. Aborting.\n");
@@ -648,14 +659,6 @@ int main(int argc, char *argv[]) {
         dm_free(A); dm_free(B); dm_free(C);
         return 0;
     }
-
-    /* Matrix search path: explicit dir, then Assignment 2, then Assignment 1
-     * (reused dataset). */
-    if (user_matrices_dir) {
-        g_matrix_dirs[g_matrix_dirs_count++] = user_matrices_dir;
-    }
-    g_matrix_dirs[g_matrix_dirs_count++] = A2_MATRICES_DIR_A2;
-    g_matrix_dirs[g_matrix_dirs_count++] = A2_MATRICES_DIR_A1;
 
     CreateDirectoryA("assignment2", NULL);
     CreateDirectoryA("assignment2\\data", NULL);
