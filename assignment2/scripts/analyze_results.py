@@ -394,7 +394,7 @@ def table_dense_speedup(summary: pd.DataFrame) -> None:
         cells = []
         for m in ["dense_ikj_reorder", "dense_blocked"]:
             row = pa[(pa["method"] == m) & (pa["n"] == n)]
-            cells.append(f"{tb / row['median_ms'].iloc[0]:.2f}\\x" if len(row) else "--")
+            cells.append(f"{tb / row['median_ms'].iloc[0]:.2f}\\times" if len(row) else "--")
         lines.append(f"{n} & " + " & ".join(cells) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}", ""]
     (TAB_DIR / "table_dense_speedup.tex").write_text("\n".join(lines), encoding="utf-8")
@@ -469,7 +469,7 @@ def table_sparse(summary: pd.DataFrame) -> None:
         lines.append(
             f"{int(r['n'])} & {r['density'] * 100:.3g} & {int(r['nnz_A_sp']):,}".replace(",", r"\,")
             + f" & {int(r['nnz_C_sp']):,}".replace(",", r"\,")
-            + f" & {r['median_ms_de']:.2f} & {r['median_ms_sp']:.3f} & {conv_ms} & {sp:.1f}\\x \\\\"
+            + f" & {r['median_ms_de']:.2f} & {r['median_ms_sp']:.3f} & {conv_ms} & {sp:.1f}\\times \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}}", r"\end{table}", ""]
     (TAB_DIR / "table_sparse.tex").write_text("\n".join(lines), encoding="utf-8")
