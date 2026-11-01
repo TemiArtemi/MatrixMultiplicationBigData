@@ -39,8 +39,6 @@ Thumbs.db
 build/
 dist/
 
-# Instructions
-Instructions.md
-
 # Agents
 AGENTS.md
+CLAUDE.md
