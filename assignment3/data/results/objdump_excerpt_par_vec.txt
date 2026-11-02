@@ -1,0 +1,18 @@
+﻿
+   372:	nopl   (%rax)
+   375:	data16 cs nopw 0x0(%rax,%rax,1)
+   380:	vmovupd (%r9,%rcx,1),%ymm0
+>  386:	vfmadd213pd (%rax,%rcx,1),%ymm1,%ymm0
+   38c:	vmovupd %ymm0,(%rax,%rcx,1)
+   391:	add    $0x20,%rcx
+   395:	cmp    %rdx,%rcx
+   3c9:	add    %r10,%rcx
+   3cc:	add    0x58(%rsp),%rcx
+   3d1:	vmovupd (%r15,%rdi,8),%xmm3
+>  3d7:	vfmadd132pd (%r14,%rcx,8),%xmm3,%xmm0
+   3dd:	mov    %ebx,%ecx
+   3df:	and    $0xfffffffe,%ecx
+   3e2:	and    $0x1,%ebx
+
+
+
