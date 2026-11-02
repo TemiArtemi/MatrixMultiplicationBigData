@@ -1,0 +1,5 @@
+n = 1000
+NumPy trace(C)  = 1.767899e+04
+C    trace(C)   = 1.767899e+04
+max |C - NumPy| = 1.364e-11  (tol: 1e-09 + 1e-09*|ref|)
+PASS
