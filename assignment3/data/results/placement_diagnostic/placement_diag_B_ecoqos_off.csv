@@ -1,0 +1,17 @@
+assignment,method,language,n,numeric_type,seed,warmup_runs,repetition_id,threads_or_workers,density,execution_time_ms,memory_metric_name,memory_value_mb,checksum,status,variant,simd,schedule,row_tile,block_size,experiment,theoretical_storage_mb,placement
+3,tiled_seq_vec,C,2000,float64,42,1,0,1,100.0000,759.3080,peak_rss_working_set_mb,98.137,3.093357e+04,OK,seq,vec,none,32,512,threads,91.5527,all_cores
+3,tiled_seq_vec,C,2000,float64,42,1,1,1,100.0000,748.1815,peak_rss_working_set_mb,98.145,3.093357e+04,OK,seq,vec,none,32,512,threads,91.5527,all_cores
+3,tiled_seq_vec,C,2000,float64,42,1,2,1,100.0000,710.6253,peak_rss_working_set_mb,98.145,3.093357e+04,OK,seq,vec,none,32,512,threads,91.5527,all_cores
+3,tiled_seq_vec,C,2000,float64,42,1,3,1,100.0000,744.8955,peak_rss_working_set_mb,98.145,3.093357e+04,OK,seq,vec,none,32,512,threads,91.5527,all_cores
+3,tiled_par_vec,C,2000,float64,42,1,0,1,100.0000,750.0744,peak_rss_working_set_mb,128.660,3.093357e+04,OK,par,vec,dynamic_1,32,512,threads,91.5527,all_cores
+3,tiled_par_vec,C,2000,float64,42,1,1,1,100.0000,761.8869,peak_rss_working_set_mb,128.660,3.093357e+04,OK,par,vec,dynamic_1,32,512,threads,91.5527,all_cores
+3,tiled_par_vec,C,2000,float64,42,1,2,1,100.0000,746.4864,peak_rss_working_set_mb,128.660,3.093357e+04,OK,par,vec,dynamic_1,32,512,threads,91.5527,all_cores
+3,tiled_par_vec,C,2000,float64,42,1,3,1,100.0000,806.1558,peak_rss_working_set_mb,128.660,3.093357e+04,OK,par,vec,dynamic_1,32,512,threads,91.5527,all_cores
+3,tiled_seq_vec,C,3000,float64,42,1,0,1,100.0000,2525.1625,peak_rss_working_set_mb,212.590,-3.624795e+04,OK,seq,vec,none,32,512,threads,205.9937,all_cores
+3,tiled_seq_vec,C,3000,float64,42,1,1,1,100.0000,2634.5580,peak_rss_working_set_mb,212.590,-3.624795e+04,OK,seq,vec,none,32,512,threads,205.9937,all_cores
+3,tiled_seq_vec,C,3000,float64,42,1,2,1,100.0000,2877.7410,peak_rss_working_set_mb,212.590,-3.624795e+04,OK,seq,vec,none,32,512,threads,205.9937,all_cores
+3,tiled_seq_vec,C,3000,float64,42,1,3,1,100.0000,2923.4425,peak_rss_working_set_mb,212.590,-3.624795e+04,OK,seq,vec,none,32,512,threads,205.9937,all_cores
+3,tiled_par_vec,C,3000,float64,42,1,0,1,100.0000,3099.1558,peak_rss_working_set_mb,281.254,-3.624795e+04,OK,par,vec,dynamic_1,32,512,threads,205.9937,all_cores
+3,tiled_par_vec,C,3000,float64,42,1,1,1,100.0000,2778.7035,peak_rss_working_set_mb,281.254,-3.624795e+04,OK,par,vec,dynamic_1,32,512,threads,205.9937,all_cores
+3,tiled_par_vec,C,3000,float64,42,1,2,1,100.0000,2768.7977,peak_rss_working_set_mb,281.254,-3.624795e+04,OK,par,vec,dynamic_1,32,512,threads,205.9937,all_cores
+3,tiled_par_vec,C,3000,float64,42,1,3,1,100.0000,2713.3923,peak_rss_working_set_mb,281.219,-3.624795e+04,OK,par,vec,dynamic_1,32,512,threads,205.9937,all_cores

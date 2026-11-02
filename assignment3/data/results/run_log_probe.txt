@@ -1,0 +1,94 @@
+﻿Assignment 3 benchmark harness (C + OpenMP)
+Warm-up runs: 1 | Measured reps: 3 | Per-run budget: 120 s | Tiles: 16 rows x 512
+EcoQoS opt-out: on | 1-thread runs on P-cores only: yes
+============================================================
+CORRECTNESS VALIDATION (Assignment 3)
+============================================================
+
+1. A x I = A and A x 0 = 0, n in {1,2,4,8,16}...
+   done (120 checks so far, 0 failures)
+
+2. Known 2x2 product...
+   done (124 checks so far, 0 failures)
+
+3-5. Reference agreement, seq/par bitwise equality, vec vs novec
+     (n in {1,2,4,8,16,17,33,100}; default and tiny tiles)...
+   vec and novec builds bit-identical on every test: yes
+
+============================================================
+332 checks, 0 failures
+ALL CORRECTNESS TESTS PASSED
+============================================================
+physical_cores,20
+logical_processors,28
+performance_cores,8
+performance_logical_processors,16
+efficiency_cores,12
+efficiency_logical_processors,12
+openmp_version,202111
+omp_num_procs,28
+omp_max_threads_default,56
+omp_dynamic,0
+omp_proc_bind,false
+omp_num_places,0
+env_OMP_NUM_THREADS,(unset)
+env_OMP_DYNAMIC,(unset)
+env_OMP_PROC_BIND,(unset)
+env_OMP_PLACES,(unset)
+env_OMP_WAIT_POLICY,(unset)
+env_OPENBLAS_NUM_THREADS,(unset)
+env_MKL_NUM_THREADS,(unset)
+target_avx2,1
+target_fma,1
+target_avx512f,0
+compiler,gcc 16.2.0
+Results file: assignment3\data\results\results_a3_probe.csv
+Cross-check log: assignment3\data\results\crosscheck_log_20261102_113651.csv
+
+############################################################
+ROW-TILE TUNING (block 512)
+############################################################
+
+--- n = 4000, row tile = 16 ---
+   tiled_seq_vec    p=1   warm-up: OK (7049.15 ms)
+   tiled_seq_vec    p=1   rep 1: OK (7704.06 ms, peak 372.9 MB)
+   tiled_seq_vec    p=1   rep 2: OK (7633.23 ms, peak 372.9 MB)
+   tiled_seq_vec    p=1   rep 3: OK (7694.26 ms, peak 372.9 MB)
+   tiled_par_vec    p=8   warm-up: OK (1246.65 ms)
+   tiled_par_vec    p=8   rep 1: OK (1253.15 ms, peak 372.0 MB)
+   tiled_par_vec    p=8   rep 2: OK (1170.32 ms, peak 372.0 MB)
+   tiled_par_vec    p=8   rep 3: OK (1154.99 ms, peak 372.0 MB)
+   tiled_par_vec    p=28  warm-up: OK (1604.93 ms)
+   tiled_par_vec    p=28  rep 1: OK (1555.75 ms, peak 372.4 MB)
+   tiled_par_vec    p=28  rep 2: OK (1866.79 ms, peak 372.4 MB)
+   tiled_par_vec    p=28  rep 3: OK (2226.96 ms, peak 372.4 MB)
+
+--- n = 4000, row tile = 64 ---
+   tiled_seq_vec    p=1   warm-up: OK (6736.67 ms)
+   tiled_seq_vec    p=1   rep 1: OK (6641.15 ms, peak 372.4 MB)
+   tiled_seq_vec    p=1   rep 2: OK (6413.46 ms, peak 372.4 MB)
+   tiled_seq_vec    p=1   rep 3: OK (6451.81 ms, peak 372.4 MB)
+   tiled_par_vec    p=8   warm-up: OK (1048.88 ms)
+   tiled_par_vec    p=8   rep 1: OK (1266.49 ms, peak 372.0 MB)
+   tiled_par_vec    p=8   rep 2: OK (1083.22 ms, peak 372.0 MB)
+   tiled_par_vec    p=8   rep 3: OK (1110.56 ms, peak 372.0 MB)
+   tiled_par_vec    p=28  warm-up: OK (1085.53 ms)
+   tiled_par_vec    p=28  rep 1: OK (1508.64 ms, peak 372.3 MB)
+   tiled_par_vec    p=28  rep 2: OK (1675.18 ms, peak 372.4 MB)
+   tiled_par_vec    p=28  rep 3: OK (1685.40 ms, peak 372.4 MB)
+
+--- n = 4000, row tile = 128 ---
+   tiled_seq_vec    p=1   warm-up: OK (6411.83 ms)
+   tiled_seq_vec    p=1   rep 1: OK (6284.88 ms, peak 372.4 MB)
+   tiled_seq_vec    p=1   rep 2: OK (6255.69 ms, peak 372.4 MB)
+   tiled_seq_vec    p=1   rep 3: OK (6558.81 ms, peak 372.4 MB)
+   tiled_par_vec    p=8   warm-up: OK (1210.12 ms)
+   tiled_par_vec    p=8   rep 1: OK (1189.40 ms, peak 372.1 MB)
+   tiled_par_vec    p=8   rep 2: OK (1124.51 ms, peak 372.1 MB)
+   tiled_par_vec    p=8   rep 3: OK (1039.70 ms, peak 372.1 MB)
+   tiled_par_vec    p=28  warm-up: OK (1230.18 ms)
+   tiled_par_vec    p=28  rep 1: OK (1586.09 ms, peak 372.4 MB)
+   tiled_par_vec    p=28  rep 2: OK (1789.34 ms, peak 372.4 MB)
+   tiled_par_vec    p=28  rep 3: OK (1771.19 ms, peak 372.4 MB)
+
+Benchmark finished in 121.0 s. Raw results: assignment3\data\results\results_a3_probe.csv

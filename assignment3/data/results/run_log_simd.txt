@@ -1,0 +1,139 @@
+﻿Assignment 3 benchmark harness (C + OpenMP)
+Warm-up runs: 1 | Measured reps: 5 | Per-run budget: 120 s | Tiles: 16 rows x 512
+EcoQoS opt-out: on | 1-thread runs on P-cores only: yes
+============================================================
+CORRECTNESS VALIDATION (Assignment 3)
+============================================================
+
+1. A x I = A and A x 0 = 0, n in {1,2,4,8,16}...
+   done (120 checks so far, 0 failures)
+
+2. Known 2x2 product...
+   done (124 checks so far, 0 failures)
+
+3-5. Reference agreement, seq/par bitwise equality, vec vs novec
+     (n in {1,2,4,8,16,17,33,100}; default and tiny tiles)...
+   vec and novec builds bit-identical on every test: yes
+
+============================================================
+332 checks, 0 failures
+ALL CORRECTNESS TESTS PASSED
+============================================================
+physical_cores,20
+logical_processors,28
+performance_cores,8
+performance_logical_processors,16
+efficiency_cores,12
+efficiency_logical_processors,12
+openmp_version,202111
+omp_num_procs,28
+omp_max_threads_default,56
+omp_dynamic,0
+omp_proc_bind,false
+omp_num_places,0
+env_OMP_NUM_THREADS,(unset)
+env_OMP_DYNAMIC,(unset)
+env_OMP_PROC_BIND,(unset)
+env_OMP_PLACES,(unset)
+env_OMP_WAIT_POLICY,(unset)
+env_OPENBLAS_NUM_THREADS,(unset)
+env_MKL_NUM_THREADS,(unset)
+target_avx2,1
+target_fma,1
+target_avx512f,0
+compiler,gcc 16.2.0
+Results file: assignment3\data\results\results_a3_simd.csv
+Cross-check log: assignment3\data\results\crosscheck_log_20261102_113513.csv
+
+############################################################
+SIMD EXTENSION (novec vs vec builds; p = 1 and p = 8)
+############################################################
+
+--- n = 1000 ---
+   tiled_seq_novec  p=1   warm-up: OK (228.31 ms)
+   tiled_seq_novec  p=1   rep 1: OK (237.42 ms, peak 29.5 MB)
+   tiled_seq_novec  p=1   rep 2: OK (238.58 ms, peak 29.5 MB)
+   tiled_seq_novec  p=1   rep 3: OK (236.28 ms, peak 29.5 MB)
+   tiled_seq_novec  p=1   rep 4: OK (231.35 ms, peak 29.5 MB)
+   tiled_seq_novec  p=1   rep 5: OK (252.69 ms, peak 29.5 MB)
+   tiled_seq_vec    p=1   warm-up: OK (85.79 ms)
+   tiled_seq_vec    p=1   rep 1: OK (85.81 ms, peak 37.1 MB)
+   tiled_seq_vec    p=1   rep 2: OK (90.77 ms, peak 37.1 MB)
+   tiled_seq_vec    p=1   rep 3: OK (87.97 ms, peak 37.1 MB)
+   tiled_seq_vec    p=1   rep 4: OK (89.90 ms, peak 37.1 MB)
+   tiled_seq_vec    p=1   rep 5: OK (103.40 ms, peak 37.1 MB)
+   cross-check tiled_seq_vec (p=1) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_novec  p=8   warm-up: OK (33.96 ms)
+   tiled_par_novec  p=8   rep 1: OK (34.48 ms, peak 36.3 MB)
+   tiled_par_novec  p=8   rep 2: OK (36.36 ms, peak 36.3 MB)
+   tiled_par_novec  p=8   rep 3: OK (36.45 ms, peak 36.3 MB)
+   tiled_par_novec  p=8   rep 4: OK (34.18 ms, peak 36.3 MB)
+   tiled_par_novec  p=8   rep 5: OK (33.74 ms, peak 36.3 MB)
+   cross-check tiled_par_novec (p=8) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (13.19 ms)
+   tiled_par_vec    p=8   rep 1: OK (13.22 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 2: OK (14.64 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 3: OK (13.96 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 4: OK (15.35 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 5: OK (14.92 ms, peak 36.3 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 2000 ---
+   tiled_seq_novec  p=1   warm-up: OK (2152.51 ms)
+   tiled_seq_novec  p=1   rep 1: OK (2160.75 ms, peak 97.4 MB)
+   tiled_seq_novec  p=1   rep 2: OK (2098.82 ms, peak 97.4 MB)
+   tiled_seq_novec  p=1   rep 3: OK (2130.38 ms, peak 97.4 MB)
+   tiled_seq_novec  p=1   rep 4: OK (2071.97 ms, peak 97.4 MB)
+   tiled_seq_novec  p=1   rep 5: OK (2120.00 ms, peak 97.4 MB)
+   tiled_seq_vec    p=1   warm-up: OK (882.52 ms)
+   tiled_seq_vec    p=1   rep 1: OK (897.66 ms, peak 127.9 MB)
+   tiled_seq_vec    p=1   rep 2: OK (895.83 ms, peak 127.9 MB)
+   tiled_seq_vec    p=1   rep 3: OK (948.69 ms, peak 127.9 MB)
+   tiled_seq_vec    p=1   rep 4: OK (856.52 ms, peak 127.9 MB)
+   tiled_seq_vec    p=1   rep 5: OK (914.20 ms, peak 127.9 MB)
+   cross-check tiled_seq_vec (p=1) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_novec  p=8   warm-up: OK (297.87 ms)
+   tiled_par_novec  p=8   rep 1: OK (297.60 ms, peak 127.9 MB)
+   tiled_par_novec  p=8   rep 2: OK (317.56 ms, peak 127.9 MB)
+   tiled_par_novec  p=8   rep 3: OK (314.85 ms, peak 127.9 MB)
+   tiled_par_novec  p=8   rep 4: OK (294.04 ms, peak 127.9 MB)
+   tiled_par_novec  p=8   rep 5: OK (302.41 ms, peak 127.9 MB)
+   cross-check tiled_par_novec (p=8) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (126.24 ms)
+   tiled_par_vec    p=8   rep 1: OK (128.04 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 2: OK (131.81 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 3: OK (161.51 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 4: OK (135.59 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 5: OK (142.12 ms, peak 127.9 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 3000 ---
+   tiled_seq_novec  p=1   warm-up: OK (7472.39 ms)
+   tiled_seq_novec  p=1   rep 1: OK (7182.36 ms, peak 211.8 MB)
+   tiled_seq_novec  p=1   rep 2: OK (6956.30 ms, peak 211.8 MB)
+   tiled_seq_novec  p=1   rep 3: OK (6888.67 ms, peak 211.8 MB)
+   tiled_seq_novec  p=1   rep 4: OK (6743.93 ms, peak 211.8 MB)
+   tiled_seq_novec  p=1   rep 5: OK (6653.59 ms, peak 211.8 MB)
+   tiled_seq_vec    p=1   warm-up: OK (3052.70 ms)
+   tiled_seq_vec    p=1   rep 1: OK (3040.70 ms, peak 280.4 MB)
+   tiled_seq_vec    p=1   rep 2: OK (3040.23 ms, peak 280.4 MB)
+   tiled_seq_vec    p=1   rep 3: OK (3035.40 ms, peak 280.4 MB)
+   tiled_seq_vec    p=1   rep 4: OK (3147.71 ms, peak 280.4 MB)
+   tiled_seq_vec    p=1   rep 5: OK (3092.17 ms, peak 280.4 MB)
+   cross-check tiled_seq_vec (p=1) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_novec  p=8   warm-up: OK (1017.51 ms)
+   tiled_par_novec  p=8   rep 1: OK (1045.15 ms, peak 280.4 MB)
+   tiled_par_novec  p=8   rep 2: OK (1069.47 ms, peak 280.4 MB)
+   tiled_par_novec  p=8   rep 3: OK (1047.02 ms, peak 280.4 MB)
+   tiled_par_novec  p=8   rep 4: OK (1076.46 ms, peak 280.4 MB)
+   tiled_par_novec  p=8   rep 5: OK (1003.73 ms, peak 280.4 MB)
+   cross-check tiled_par_novec (p=8) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (458.72 ms)
+   tiled_par_vec    p=8   rep 1: OK (461.94 ms, peak 280.4 MB)
+   tiled_par_vec    p=8   rep 2: OK (461.57 ms, peak 280.4 MB)
+   tiled_par_vec    p=8   rep 3: OK (479.73 ms, peak 280.4 MB)
+   tiled_par_vec    p=8   rep 4: OK (489.77 ms, peak 280.4 MB)
+   tiled_par_vec    p=8   rep 5: OK (478.40 ms, peak 280.4 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_novec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+Benchmark finished in 97.8 s. Raw results: assignment3\data\results\results_a3_simd.csv

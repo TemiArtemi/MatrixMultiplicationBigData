@@ -40,7 +40,7 @@ foreach ($v in $variants) {
 }
 
 # Support modules: not performance critical, compiled as in Assignment 2.
-$support = @("a3_timer", "a3_matrix", "a3_registry", "a3_validate",
+$support = @("a3_timer", "a3_matrix", "a3_registry", "a3_validate", "a3_affinity",
              "a3_sysinfo", "a3_bench")
 foreach ($m in $support) {
     $obj = "$build\$m.o"

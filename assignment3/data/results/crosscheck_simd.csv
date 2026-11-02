@@ -1,0 +1,10 @@
+assignment,experiment,method,threads,reference,n,max_abs_diff,bitwise_equal,status
+3,simd,tiled_seq_vec,1,tiled_seq_novec,1000,0.000000e+00,1,OK
+3,simd,tiled_par_novec,8,tiled_seq_novec,1000,0.000000e+00,1,OK
+3,simd,tiled_par_vec,8,tiled_seq_novec,1000,0.000000e+00,1,OK
+3,simd,tiled_seq_vec,1,tiled_seq_novec,2000,0.000000e+00,1,OK
+3,simd,tiled_par_novec,8,tiled_seq_novec,2000,0.000000e+00,1,OK
+3,simd,tiled_par_vec,8,tiled_seq_novec,2000,0.000000e+00,1,OK
+3,simd,tiled_seq_vec,1,tiled_seq_novec,3000,0.000000e+00,1,OK
+3,simd,tiled_par_novec,8,tiled_seq_novec,3000,0.000000e+00,1,OK
+3,simd,tiled_par_vec,8,tiled_seq_novec,3000,0.000000e+00,1,OK

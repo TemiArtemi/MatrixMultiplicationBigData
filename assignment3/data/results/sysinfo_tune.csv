@@ -22,3 +22,5 @@ target_avx2,1
 target_fma,1
 target_avx512f,0
 compiler,gcc 16.2.0
+ecoqos_optout,on
+single_thread_runs_on_pcores_only,1

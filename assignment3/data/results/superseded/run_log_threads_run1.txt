@@ -1,0 +1,441 @@
+﻿Assignment 3 benchmark harness (C + OpenMP)
+Warm-up runs: 1 | Measured reps: 5 | Per-run budget: 120 s | Tiles: 32 rows x 512
+============================================================
+CORRECTNESS VALIDATION (Assignment 3)
+============================================================
+
+1. A x I = A and A x 0 = 0, n in {1,2,4,8,16}...
+   done (120 checks so far, 0 failures)
+
+2. Known 2x2 product...
+   done (124 checks so far, 0 failures)
+
+3-5. Reference agreement, seq/par bitwise equality, vec vs novec
+     (n in {1,2,4,8,16,17,33,100}; default and tiny tiles)...
+   vec and novec builds bit-identical on every test: yes
+
+============================================================
+332 checks, 0 failures
+ALL CORRECTNESS TESTS PASSED
+============================================================
+physical_cores,20
+logical_processors,28
+performance_cores,8
+performance_logical_processors,16
+efficiency_cores,12
+efficiency_logical_processors,12
+openmp_version,202111
+omp_num_procs,28
+omp_max_threads_default,56
+omp_dynamic,0
+omp_proc_bind,false
+omp_num_places,0
+env_OMP_NUM_THREADS,(unset)
+env_OMP_DYNAMIC,(unset)
+env_OMP_PROC_BIND,(unset)
+env_OMP_PLACES,(unset)
+env_OMP_WAIT_POLICY,(unset)
+env_OPENBLAS_NUM_THREADS,(unset)
+env_MKL_NUM_THREADS,(unset)
+target_avx2,1
+target_fma,1
+target_avx512f,0
+compiler,gcc 16.2.0
+Results file: assignment3\data\results\results_a3_threads.csv
+Cross-check log: assignment3\data\results\crosscheck_log_20261102_111708.csv
+
+############################################################
+THREAD SCALING (tiled_seq_vec baseline vs tiled_par_vec)
+############################################################
+
+--- n = 400 ---
+   tiled_seq_vec    p=1   warm-up: OK (4.91 ms)
+   tiled_seq_vec    p=1   rep 1: OK (4.52 ms, peak 10.2 MB)
+   tiled_seq_vec    p=1   rep 2: OK (4.41 ms, peak 10.2 MB)
+   tiled_seq_vec    p=1   rep 3: OK (4.89 ms, peak 10.2 MB)
+   tiled_seq_vec    p=1   rep 4: OK (4.54 ms, peak 10.2 MB)
+   tiled_seq_vec    p=1   rep 5: OK (4.31 ms, peak 10.2 MB)
+   tiled_par_vec    p=1   warm-up: OK (4.63 ms)
+   tiled_par_vec    p=1   rep 1: OK (4.50 ms, peak 11.4 MB)
+   tiled_par_vec    p=1   rep 2: OK (4.21 ms, peak 11.4 MB)
+   tiled_par_vec    p=1   rep 3: OK (4.79 ms, peak 11.4 MB)
+   tiled_par_vec    p=1   rep 4: OK (4.94 ms, peak 11.4 MB)
+   tiled_par_vec    p=1   rep 5: OK (4.72 ms, peak 11.4 MB)
+   cross-check tiled_par_vec (p=1) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=2   warm-up: OK (2.76 ms)
+   tiled_par_vec    p=2   rep 1: OK (2.36 ms, peak 10.6 MB)
+   tiled_par_vec    p=2   rep 2: OK (2.50 ms, peak 10.6 MB)
+   tiled_par_vec    p=2   rep 3: OK (2.40 ms, peak 10.6 MB)
+   tiled_par_vec    p=2   rep 4: OK (2.27 ms, peak 10.6 MB)
+   tiled_par_vec    p=2   rep 5: OK (2.36 ms, peak 10.6 MB)
+   cross-check tiled_par_vec (p=2) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=4   warm-up: OK (1.46 ms)
+   tiled_par_vec    p=4   rep 1: OK (1.45 ms, peak 10.6 MB)
+   tiled_par_vec    p=4   rep 2: OK (1.37 ms, peak 10.6 MB)
+   tiled_par_vec    p=4   rep 3: OK (1.29 ms, peak 10.6 MB)
+   tiled_par_vec    p=4   rep 4: OK (1.35 ms, peak 10.6 MB)
+   tiled_par_vec    p=4   rep 5: OK (1.57 ms, peak 10.6 MB)
+   cross-check tiled_par_vec (p=4) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (1.51 ms)
+   tiled_par_vec    p=8   rep 1: OK (0.88 ms, peak 10.7 MB)
+   tiled_par_vec    p=8   rep 2: OK (0.92 ms, peak 10.7 MB)
+   tiled_par_vec    p=8   rep 3: OK (0.93 ms, peak 10.7 MB)
+   tiled_par_vec    p=8   rep 4: OK (1.14 ms, peak 10.7 MB)
+   tiled_par_vec    p=8   rep 5: OK (1.16 ms, peak 10.7 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=12  warm-up: OK (1.19 ms)
+   tiled_par_vec    p=12  rep 1: OK (0.88 ms, peak 10.8 MB)
+   tiled_par_vec    p=12  rep 2: OK (0.92 ms, peak 10.8 MB)
+   tiled_par_vec    p=12  rep 3: OK (1.08 ms, peak 10.8 MB)
+   tiled_par_vec    p=12  rep 4: OK (0.98 ms, peak 10.8 MB)
+   tiled_par_vec    p=12  rep 5: OK (0.89 ms, peak 10.8 MB)
+   cross-check tiled_par_vec (p=12) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=16  warm-up: OK (1.52 ms)
+   tiled_par_vec    p=16  rep 1: OK (0.83 ms, peak 10.8 MB)
+   tiled_par_vec    p=16  rep 2: OK (1.04 ms, peak 10.8 MB)
+   tiled_par_vec    p=16  rep 3: OK (0.94 ms, peak 10.8 MB)
+   tiled_par_vec    p=16  rep 4: OK (0.88 ms, peak 10.8 MB)
+   tiled_par_vec    p=16  rep 5: OK (0.84 ms, peak 10.8 MB)
+   cross-check tiled_par_vec (p=16) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=20  warm-up: OK (1.07 ms)
+   tiled_par_vec    p=20  rep 1: OK (0.97 ms, peak 10.9 MB)
+   tiled_par_vec    p=20  rep 2: OK (1.04 ms, peak 10.9 MB)
+   tiled_par_vec    p=20  rep 3: OK (1.26 ms, peak 10.9 MB)
+   tiled_par_vec    p=20  rep 4: OK (0.85 ms, peak 10.9 MB)
+   tiled_par_vec    p=20  rep 5: OK (0.97 ms, peak 10.9 MB)
+   cross-check tiled_par_vec (p=20) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=24  warm-up: OK (1.36 ms)
+   tiled_par_vec    p=24  rep 1: OK (0.86 ms, peak 10.9 MB)
+   tiled_par_vec    p=24  rep 2: OK (0.87 ms, peak 10.9 MB)
+   tiled_par_vec    p=24  rep 3: OK (0.91 ms, peak 10.9 MB)
+   tiled_par_vec    p=24  rep 4: OK (0.86 ms, peak 10.9 MB)
+   tiled_par_vec    p=24  rep 5: OK (0.94 ms, peak 10.9 MB)
+   cross-check tiled_par_vec (p=24) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=28  warm-up: OK (1.57 ms)
+   tiled_par_vec    p=28  rep 1: OK (1.27 ms, peak 11.0 MB)
+   tiled_par_vec    p=28  rep 2: OK (0.83 ms, peak 11.0 MB)
+   tiled_par_vec    p=28  rep 3: OK (1.01 ms, peak 11.0 MB)
+   tiled_par_vec    p=28  rep 4: OK (1.25 ms, peak 11.0 MB)
+   tiled_par_vec    p=28  rep 5: OK (0.83 ms, peak 11.0 MB)
+   cross-check tiled_par_vec (p=28) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=56  warm-up: OK (1.82 ms)
+   tiled_par_vec    p=56  rep 1: OK (1.31 ms, peak 11.5 MB)
+   tiled_par_vec    p=56  rep 2: OK (0.99 ms, peak 11.5 MB)
+   tiled_par_vec    p=56  rep 3: OK (1.35 ms, peak 11.5 MB)
+   tiled_par_vec    p=56  rep 4: OK (1.37 ms, peak 11.5 MB)
+   tiled_par_vec    p=56  rep 5: OK (1.69 ms, peak 11.5 MB)
+   cross-check tiled_par_vec (p=56) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 1000 ---
+   tiled_seq_vec    p=1   warm-up: OK (90.72 ms)
+   tiled_seq_vec    p=1   rep 1: OK (83.95 ms, peak 29.5 MB)
+   tiled_seq_vec    p=1   rep 2: OK (82.95 ms, peak 29.5 MB)
+   tiled_seq_vec    p=1   rep 3: OK (83.75 ms, peak 29.5 MB)
+   tiled_seq_vec    p=1   rep 4: OK (83.36 ms, peak 29.5 MB)
+   tiled_seq_vec    p=1   rep 5: OK (82.66 ms, peak 29.5 MB)
+   tiled_par_vec    p=1   warm-up: OK (87.69 ms)
+   tiled_par_vec    p=1   rep 1: OK (91.42 ms, peak 37.1 MB)
+   tiled_par_vec    p=1   rep 2: OK (91.65 ms, peak 37.1 MB)
+   tiled_par_vec    p=1   rep 3: OK (84.06 ms, peak 37.1 MB)
+   tiled_par_vec    p=1   rep 4: OK (85.08 ms, peak 37.1 MB)
+   tiled_par_vec    p=1   rep 5: OK (88.99 ms, peak 37.1 MB)
+   cross-check tiled_par_vec (p=1) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=2   warm-up: OK (42.89 ms)
+   tiled_par_vec    p=2   rep 1: OK (41.65 ms, peak 36.2 MB)
+   tiled_par_vec    p=2   rep 2: OK (41.65 ms, peak 36.2 MB)
+   tiled_par_vec    p=2   rep 3: OK (42.26 ms, peak 36.2 MB)
+   tiled_par_vec    p=2   rep 4: OK (44.30 ms, peak 36.2 MB)
+   tiled_par_vec    p=2   rep 5: OK (44.48 ms, peak 36.2 MB)
+   cross-check tiled_par_vec (p=2) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=4   warm-up: OK (23.26 ms)
+   tiled_par_vec    p=4   rep 1: OK (23.02 ms, peak 36.3 MB)
+   tiled_par_vec    p=4   rep 2: OK (22.92 ms, peak 36.3 MB)
+   tiled_par_vec    p=4   rep 3: OK (22.68 ms, peak 36.3 MB)
+   tiled_par_vec    p=4   rep 4: OK (23.08 ms, peak 36.3 MB)
+   tiled_par_vec    p=4   rep 5: OK (23.11 ms, peak 36.3 MB)
+   cross-check tiled_par_vec (p=4) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (13.95 ms)
+   tiled_par_vec    p=8   rep 1: OK (14.49 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 2: OK (13.93 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 3: OK (12.45 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 4: OK (12.68 ms, peak 36.3 MB)
+   tiled_par_vec    p=8   rep 5: OK (12.42 ms, peak 36.3 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=12  warm-up: OK (11.82 ms)
+   tiled_par_vec    p=12  rep 1: OK (11.97 ms, peak 36.4 MB)
+   tiled_par_vec    p=12  rep 2: OK (14.70 ms, peak 36.4 MB)
+   tiled_par_vec    p=12  rep 3: OK (12.90 ms, peak 36.4 MB)
+   tiled_par_vec    p=12  rep 4: OK (11.82 ms, peak 36.4 MB)
+   tiled_par_vec    p=12  rep 5: OK (11.89 ms, peak 36.4 MB)
+   cross-check tiled_par_vec (p=12) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=16  warm-up: OK (10.25 ms)
+   tiled_par_vec    p=16  rep 1: OK (11.83 ms, peak 36.5 MB)
+   tiled_par_vec    p=16  rep 2: OK (11.97 ms, peak 36.5 MB)
+   tiled_par_vec    p=16  rep 3: OK (14.59 ms, peak 36.5 MB)
+   tiled_par_vec    p=16  rep 4: OK (12.58 ms, peak 36.5 MB)
+   tiled_par_vec    p=16  rep 5: OK (15.03 ms, peak 36.5 MB)
+   cross-check tiled_par_vec (p=16) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=20  warm-up: OK (16.09 ms)
+   tiled_par_vec    p=20  rep 1: OK (16.02 ms, peak 36.5 MB)
+   tiled_par_vec    p=20  rep 2: OK (15.55 ms, peak 36.5 MB)
+   tiled_par_vec    p=20  rep 3: OK (13.65 ms, peak 36.5 MB)
+   tiled_par_vec    p=20  rep 4: OK (15.35 ms, peak 36.5 MB)
+   tiled_par_vec    p=20  rep 5: OK (12.60 ms, peak 36.5 MB)
+   cross-check tiled_par_vec (p=20) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=24  warm-up: OK (10.65 ms)
+   tiled_par_vec    p=24  rep 1: OK (10.84 ms, peak 36.6 MB)
+   tiled_par_vec    p=24  rep 2: OK (11.80 ms, peak 36.6 MB)
+   tiled_par_vec    p=24  rep 3: OK (12.76 ms, peak 36.6 MB)
+   tiled_par_vec    p=24  rep 4: OK (9.70 ms, peak 36.6 MB)
+   tiled_par_vec    p=24  rep 5: OK (13.67 ms, peak 36.6 MB)
+   cross-check tiled_par_vec (p=24) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=28  warm-up: OK (10.29 ms)
+   tiled_par_vec    p=28  rep 1: OK (9.81 ms, peak 36.7 MB)
+   tiled_par_vec    p=28  rep 2: OK (11.07 ms, peak 36.7 MB)
+   tiled_par_vec    p=28  rep 3: OK (11.75 ms, peak 36.7 MB)
+   tiled_par_vec    p=28  rep 4: OK (10.20 ms, peak 36.7 MB)
+   tiled_par_vec    p=28  rep 5: OK (9.58 ms, peak 36.7 MB)
+   cross-check tiled_par_vec (p=28) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=56  warm-up: OK (11.40 ms)
+   tiled_par_vec    p=56  rep 1: OK (10.59 ms, peak 37.2 MB)
+   tiled_par_vec    p=56  rep 2: OK (11.16 ms, peak 37.2 MB)
+   tiled_par_vec    p=56  rep 3: OK (10.78 ms, peak 37.2 MB)
+   tiled_par_vec    p=56  rep 4: OK (11.54 ms, peak 37.2 MB)
+   tiled_par_vec    p=56  rep 5: OK (10.96 ms, peak 37.2 MB)
+   cross-check tiled_par_vec (p=56) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 2000 ---
+   tiled_seq_vec    p=1   warm-up: OK (862.98 ms)
+   tiled_seq_vec    p=1   rep 1: OK (1540.93 ms, peak 98.2 MB)
+   tiled_seq_vec    p=1   rep 2: OK (1779.26 ms, peak 98.2 MB)
+   tiled_seq_vec    p=1   rep 3: OK (1752.75 ms, peak 98.2 MB)
+   tiled_seq_vec    p=1   rep 4: OK (1817.37 ms, peak 98.2 MB)
+   tiled_seq_vec    p=1   rep 5: OK (1571.96 ms, peak 98.2 MB)
+   tiled_par_vec    p=1   warm-up: OK (1782.68 ms)
+   tiled_par_vec    p=1   rep 1: OK (1866.11 ms, peak 128.8 MB)
+   tiled_par_vec    p=1   rep 2: OK (1679.32 ms, peak 128.8 MB)
+   tiled_par_vec    p=1   rep 3: OK (1820.65 ms, peak 128.8 MB)
+   tiled_par_vec    p=1   rep 4: OK (1817.77 ms, peak 128.8 MB)
+   tiled_par_vec    p=1   rep 5: OK (1788.92 ms, peak 128.8 MB)
+   cross-check tiled_par_vec (p=1) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=2   warm-up: OK (959.85 ms)
+   tiled_par_vec    p=2   rep 1: OK (897.59 ms, peak 127.9 MB)
+   tiled_par_vec    p=2   rep 2: OK (912.82 ms, peak 127.9 MB)
+   tiled_par_vec    p=2   rep 3: OK (920.09 ms, peak 127.9 MB)
+   tiled_par_vec    p=2   rep 4: OK (951.10 ms, peak 127.9 MB)
+   tiled_par_vec    p=2   rep 5: OK (936.62 ms, peak 127.9 MB)
+   cross-check tiled_par_vec (p=2) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=4   warm-up: OK (465.63 ms)
+   tiled_par_vec    p=4   rep 1: OK (524.79 ms, peak 127.9 MB)
+   tiled_par_vec    p=4   rep 2: OK (552.98 ms, peak 127.9 MB)
+   tiled_par_vec    p=4   rep 3: OK (536.91 ms, peak 127.9 MB)
+   tiled_par_vec    p=4   rep 4: OK (510.59 ms, peak 127.9 MB)
+   tiled_par_vec    p=4   rep 5: OK (519.38 ms, peak 127.9 MB)
+   cross-check tiled_par_vec (p=4) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (327.46 ms)
+   tiled_par_vec    p=8   rep 1: OK (343.99 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 2: OK (342.65 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 3: OK (319.63 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 4: OK (283.23 ms, peak 127.9 MB)
+   tiled_par_vec    p=8   rep 5: OK (262.37 ms, peak 127.9 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=12  warm-up: OK (271.01 ms)
+   tiled_par_vec    p=12  rep 1: OK (305.53 ms, peak 128.0 MB)
+   tiled_par_vec    p=12  rep 2: OK (271.68 ms, peak 128.0 MB)
+   tiled_par_vec    p=12  rep 3: OK (298.15 ms, peak 128.0 MB)
+   tiled_par_vec    p=12  rep 4: OK (307.09 ms, peak 128.0 MB)
+   tiled_par_vec    p=12  rep 5: OK (327.16 ms, peak 128.0 MB)
+   cross-check tiled_par_vec (p=12) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=16  warm-up: OK (285.78 ms)
+   tiled_par_vec    p=16  rep 1: OK (297.82 ms, peak 128.1 MB)
+   tiled_par_vec    p=16  rep 2: OK (284.65 ms, peak 128.1 MB)
+   tiled_par_vec    p=16  rep 3: OK (319.10 ms, peak 128.1 MB)
+   tiled_par_vec    p=16  rep 4: OK (343.88 ms, peak 128.1 MB)
+   tiled_par_vec    p=16  rep 5: OK (306.08 ms, peak 128.1 MB)
+   cross-check tiled_par_vec (p=16) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=20  warm-up: OK (313.78 ms)
+   tiled_par_vec    p=20  rep 1: OK (289.56 ms, peak 128.1 MB)
+   tiled_par_vec    p=20  rep 2: OK (273.68 ms, peak 128.1 MB)
+   tiled_par_vec    p=20  rep 3: OK (269.70 ms, peak 128.1 MB)
+   tiled_par_vec    p=20  rep 4: OK (269.13 ms, peak 128.1 MB)
+   tiled_par_vec    p=20  rep 5: OK (259.66 ms, peak 128.1 MB)
+   cross-check tiled_par_vec (p=20) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=24  warm-up: OK (293.03 ms)
+   tiled_par_vec    p=24  rep 1: OK (278.96 ms, peak 128.2 MB)
+   tiled_par_vec    p=24  rep 2: OK (261.62 ms, peak 128.2 MB)
+   tiled_par_vec    p=24  rep 3: OK (270.48 ms, peak 128.2 MB)
+   tiled_par_vec    p=24  rep 4: OK (289.67 ms, peak 128.2 MB)
+   tiled_par_vec    p=24  rep 5: OK (263.09 ms, peak 128.2 MB)
+   cross-check tiled_par_vec (p=24) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=28  warm-up: OK (287.80 ms)
+   tiled_par_vec    p=28  rep 1: OK (259.87 ms, peak 128.3 MB)
+   tiled_par_vec    p=28  rep 2: OK (275.36 ms, peak 128.3 MB)
+   tiled_par_vec    p=28  rep 3: OK (283.76 ms, peak 128.3 MB)
+   tiled_par_vec    p=28  rep 4: OK (265.91 ms, peak 128.3 MB)
+   tiled_par_vec    p=28  rep 5: OK (260.03 ms, peak 128.3 MB)
+   cross-check tiled_par_vec (p=28) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=56  warm-up: OK (248.48 ms)
+   tiled_par_vec    p=56  rep 1: OK (245.60 ms, peak 128.8 MB)
+   tiled_par_vec    p=56  rep 2: OK (245.27 ms, peak 128.8 MB)
+   tiled_par_vec    p=56  rep 3: OK (244.19 ms, peak 128.8 MB)
+   tiled_par_vec    p=56  rep 4: OK (246.83 ms, peak 128.8 MB)
+   tiled_par_vec    p=56  rep 5: OK (232.43 ms, peak 128.8 MB)
+   cross-check tiled_par_vec (p=56) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 3000 ---
+   tiled_seq_vec    p=1   warm-up: OK (6387.78 ms)
+   tiled_seq_vec    p=1   rep 1: OK (6332.81 ms, peak 212.7 MB)
+   tiled_seq_vec    p=1   rep 2: OK (6379.53 ms, peak 212.7 MB)
+   tiled_seq_vec    p=1   rep 3: OK (6515.14 ms, peak 212.7 MB)
+   tiled_seq_vec    p=1   rep 4: OK (6398.79 ms, peak 212.7 MB)
+   tiled_seq_vec    p=1   rep 5: OK (6200.07 ms, peak 212.7 MB)
+   tiled_par_vec    p=1   warm-up: OK (6472.44 ms)
+   tiled_par_vec    p=1   rep 1: OK (6397.59 ms, peak 281.4 MB)
+   tiled_par_vec    p=1   rep 2: OK (6102.83 ms, peak 281.4 MB)
+   tiled_par_vec    p=1   rep 3: OK (6501.92 ms, peak 281.4 MB)
+   tiled_par_vec    p=1   rep 4: OK (6313.43 ms, peak 281.4 MB)
+   tiled_par_vec    p=1   rep 5: OK (6203.81 ms, peak 281.4 MB)
+   cross-check tiled_par_vec (p=1) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=2   warm-up: OK (3067.39 ms)
+   tiled_par_vec    p=2   rep 1: OK (3098.56 ms, peak 280.6 MB)
+   tiled_par_vec    p=2   rep 2: OK (3131.99 ms, peak 280.6 MB)
+   tiled_par_vec    p=2   rep 3: OK (3179.66 ms, peak 280.6 MB)
+   tiled_par_vec    p=2   rep 4: OK (3125.89 ms, peak 280.6 MB)
+   tiled_par_vec    p=2   rep 5: OK (3441.12 ms, peak 280.6 MB)
+   cross-check tiled_par_vec (p=2) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=4   warm-up: OK (1718.54 ms)
+   tiled_par_vec    p=4   rep 1: OK (1845.99 ms, peak 280.6 MB)
+   tiled_par_vec    p=4   rep 2: OK (1763.43 ms, peak 280.6 MB)
+   tiled_par_vec    p=4   rep 3: OK (1784.01 ms, peak 280.6 MB)
+   tiled_par_vec    p=4   rep 4: OK (1631.88 ms, peak 280.6 MB)
+   tiled_par_vec    p=4   rep 5: OK (1718.94 ms, peak 280.6 MB)
+   cross-check tiled_par_vec (p=4) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (1127.33 ms)
+   tiled_par_vec    p=8   rep 1: OK (1243.60 ms, peak 280.7 MB)
+   tiled_par_vec    p=8   rep 2: OK (1327.30 ms, peak 280.7 MB)
+   tiled_par_vec    p=8   rep 3: OK (1399.34 ms, peak 280.7 MB)
+   tiled_par_vec    p=8   rep 4: OK (1189.82 ms, peak 280.7 MB)
+   tiled_par_vec    p=8   rep 5: OK (1318.88 ms, peak 280.7 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=12  warm-up: OK (1133.39 ms)
+   tiled_par_vec    p=12  rep 1: OK (1304.59 ms, peak 280.7 MB)
+   tiled_par_vec    p=12  rep 2: OK (1331.03 ms, peak 280.7 MB)
+   tiled_par_vec    p=12  rep 3: OK (1184.66 ms, peak 280.7 MB)
+   tiled_par_vec    p=12  rep 4: OK (710.46 ms, peak 280.7 MB)
+   tiled_par_vec    p=12  rep 5: OK (660.11 ms, peak 280.7 MB)
+   cross-check tiled_par_vec (p=12) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=16  warm-up: OK (644.26 ms)
+   tiled_par_vec    p=16  rep 1: OK (655.34 ms, peak 280.8 MB)
+   tiled_par_vec    p=16  rep 2: OK (742.00 ms, peak 280.8 MB)
+   tiled_par_vec    p=16  rep 3: OK (655.09 ms, peak 280.8 MB)
+   tiled_par_vec    p=16  rep 4: OK (695.70 ms, peak 280.8 MB)
+   tiled_par_vec    p=16  rep 5: OK (840.48 ms, peak 280.8 MB)
+   cross-check tiled_par_vec (p=16) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=20  warm-up: OK (703.28 ms)
+   tiled_par_vec    p=20  rep 1: OK (671.39 ms, peak 280.8 MB)
+   tiled_par_vec    p=20  rep 2: OK (523.82 ms, peak 280.8 MB)
+   tiled_par_vec    p=20  rep 3: OK (550.10 ms, peak 280.8 MB)
+   tiled_par_vec    p=20  rep 4: OK (553.99 ms, peak 280.8 MB)
+   tiled_par_vec    p=20  rep 5: OK (790.90 ms, peak 280.8 MB)
+   cross-check tiled_par_vec (p=20) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=24  warm-up: OK (858.72 ms)
+   tiled_par_vec    p=24  rep 1: OK (936.67 ms, peak 280.9 MB)
+   tiled_par_vec    p=24  rep 2: OK (871.34 ms, peak 280.9 MB)
+   tiled_par_vec    p=24  rep 3: OK (869.26 ms, peak 280.9 MB)
+   tiled_par_vec    p=24  rep 4: OK (800.53 ms, peak 280.9 MB)
+   tiled_par_vec    p=24  rep 5: OK (817.39 ms, peak 280.9 MB)
+   cross-check tiled_par_vec (p=24) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=28  warm-up: OK (708.92 ms)
+   tiled_par_vec    p=28  rep 1: OK (713.94 ms, peak 281.0 MB)
+   tiled_par_vec    p=28  rep 2: OK (754.95 ms, peak 281.0 MB)
+   tiled_par_vec    p=28  rep 3: OK (745.85 ms, peak 281.0 MB)
+   tiled_par_vec    p=28  rep 4: OK (774.37 ms, peak 281.0 MB)
+   tiled_par_vec    p=28  rep 5: OK (715.54 ms, peak 281.0 MB)
+   cross-check tiled_par_vec (p=28) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=56  warm-up: OK (717.67 ms)
+   tiled_par_vec    p=56  rep 1: OK (722.44 ms, peak 281.4 MB)
+   tiled_par_vec    p=56  rep 2: OK (721.13 ms, peak 281.4 MB)
+   tiled_par_vec    p=56  rep 3: OK (708.06 ms, peak 281.4 MB)
+   tiled_par_vec    p=56  rep 4: OK (686.35 ms, peak 281.4 MB)
+   tiled_par_vec    p=56  rep 5: OK (688.92 ms, peak 281.4 MB)
+   cross-check tiled_par_vec (p=56) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 4000 ---
+   tiled_seq_vec    p=1   warm-up: OK (6911.43 ms)
+   tiled_seq_vec    p=1   rep 1: OK (6551.67 ms, peak 373.0 MB)
+   tiled_seq_vec    p=1   rep 2: OK (6471.69 ms, peak 373.0 MB)
+   tiled_seq_vec    p=1   rep 3: OK (6492.72 ms, peak 373.0 MB)
+   tiled_seq_vec    p=1   rep 4: OK (6686.52 ms, peak 373.0 MB)
+   tiled_seq_vec    p=1   rep 5: OK (6802.47 ms, peak 373.0 MB)
+   tiled_par_vec    p=1   warm-up: OK (6665.86 ms)
+   tiled_par_vec    p=1   rep 1: OK (6559.40 ms, peak 495.0 MB)
+   tiled_par_vec    p=1   rep 2: OK (6445.32 ms, peak 495.0 MB)
+   tiled_par_vec    p=1   rep 3: OK (6466.05 ms, peak 495.0 MB)
+   tiled_par_vec    p=1   rep 4: OK (6517.32 ms, peak 495.0 MB)
+   tiled_par_vec    p=1   rep 5: OK (6423.52 ms, peak 495.0 MB)
+   cross-check tiled_par_vec (p=1) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=2   warm-up: OK (3133.12 ms)
+   tiled_par_vec    p=2   rep 1: OK (3146.24 ms, peak 494.2 MB)
+   tiled_par_vec    p=2   rep 2: OK (3154.48 ms, peak 494.2 MB)
+   tiled_par_vec    p=2   rep 3: OK (3171.81 ms, peak 494.2 MB)
+   tiled_par_vec    p=2   rep 4: OK (3224.48 ms, peak 494.2 MB)
+   tiled_par_vec    p=2   rep 5: OK (3212.78 ms, peak 494.2 MB)
+   cross-check tiled_par_vec (p=2) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=4   warm-up: OK (1691.76 ms)
+   tiled_par_vec    p=4   rep 1: OK (1710.49 ms, peak 494.3 MB)
+   tiled_par_vec    p=4   rep 2: OK (1724.00 ms, peak 494.3 MB)
+   tiled_par_vec    p=4   rep 3: OK (1863.89 ms, peak 494.3 MB)
+   tiled_par_vec    p=4   rep 4: OK (2568.78 ms, peak 494.3 MB)
+   tiled_par_vec    p=4   rep 5: OK (1927.49 ms, peak 494.3 MB)
+   cross-check tiled_par_vec (p=4) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=8   warm-up: OK (1149.22 ms)
+   tiled_par_vec    p=8   rep 1: OK (1115.74 ms, peak 494.4 MB)
+   tiled_par_vec    p=8   rep 2: OK (1120.44 ms, peak 494.4 MB)
+   tiled_par_vec    p=8   rep 3: OK (1185.10 ms, peak 494.4 MB)
+   tiled_par_vec    p=8   rep 4: OK (1191.74 ms, peak 494.4 MB)
+   tiled_par_vec    p=8   rep 5: OK (1463.93 ms, peak 494.4 MB)
+   cross-check tiled_par_vec (p=8) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=12  warm-up: OK (1383.69 ms)
+   tiled_par_vec    p=12  rep 1: OK (1473.84 ms, peak 494.4 MB)
+   tiled_par_vec    p=12  rep 2: OK (1468.02 ms, peak 494.4 MB)
+   tiled_par_vec    p=12  rep 3: OK (1418.75 ms, peak 494.4 MB)
+   tiled_par_vec    p=12  rep 4: OK (1404.99 ms, peak 494.4 MB)
+   tiled_par_vec    p=12  rep 5: OK (1385.57 ms, peak 494.4 MB)
+   cross-check tiled_par_vec (p=12) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=16  warm-up: OK (1411.84 ms)
+   tiled_par_vec    p=16  rep 1: OK (1467.28 ms, peak 494.5 MB)
+   tiled_par_vec    p=16  rep 2: OK (1706.28 ms, peak 494.5 MB)
+   tiled_par_vec    p=16  rep 3: OK (1605.09 ms, peak 494.5 MB)
+   tiled_par_vec    p=16  rep 4: OK (1604.07 ms, peak 494.5 MB)
+   tiled_par_vec    p=16  rep 5: OK (1595.99 ms, peak 494.5 MB)
+   cross-check tiled_par_vec (p=16) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=20  warm-up: OK (1692.92 ms)
+   tiled_par_vec    p=20  rep 1: OK (1693.57 ms, peak 494.6 MB)
+   tiled_par_vec    p=20  rep 2: OK (1638.10 ms, peak 494.6 MB)
+   tiled_par_vec    p=20  rep 3: OK (1658.08 ms, peak 494.6 MB)
+   tiled_par_vec    p=20  rep 4: OK (1652.60 ms, peak 494.6 MB)
+   tiled_par_vec    p=20  rep 5: OK (1763.46 ms, peak 494.6 MB)
+   cross-check tiled_par_vec (p=20) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=24  warm-up: OK (1827.51 ms)
+   tiled_par_vec    p=24  rep 1: OK (1807.07 ms, peak 494.6 MB)
+   tiled_par_vec    p=24  rep 2: OK (1814.19 ms, peak 494.6 MB)
+   tiled_par_vec    p=24  rep 3: OK (1785.60 ms, peak 494.6 MB)
+   tiled_par_vec    p=24  rep 4: OK (1818.74 ms, peak 494.6 MB)
+   tiled_par_vec    p=24  rep 5: OK (1923.45 ms, peak 494.6 MB)
+   cross-check tiled_par_vec (p=24) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=28  warm-up: OK (1986.96 ms)
+   tiled_par_vec    p=28  rep 1: OK (1777.65 ms, peak 494.7 MB)
+   tiled_par_vec    p=28  rep 2: OK (1848.94 ms, peak 494.7 MB)
+   tiled_par_vec    p=28  rep 3: OK (1924.24 ms, peak 494.7 MB)
+   tiled_par_vec    p=28  rep 4: OK (1805.20 ms, peak 494.7 MB)
+   tiled_par_vec    p=28  rep 5: OK (1887.51 ms, peak 494.7 MB)
+   cross-check tiled_par_vec (p=28) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+   tiled_par_vec    p=56  warm-up: OK (1797.62 ms)
+   tiled_par_vec    p=56  rep 1: OK (1825.30 ms, peak 495.2 MB)
+   tiled_par_vec    p=56  rep 2: OK (1806.99 ms, peak 495.2 MB)
+   tiled_par_vec    p=56  rep 3: OK (1753.33 ms, peak 495.2 MB)
+   tiled_par_vec    p=56  rep 4: OK (1789.96 ms, peak 495.2 MB)
+   tiled_par_vec    p=56  rep 5: OK (1837.74 ms, peak 495.2 MB)
+   cross-check tiled_par_vec (p=56) vs tiled_seq_vec: max |diff| = 0.000e+00, bitwise yes [OK]
+
+Benchmark finished in 378.1 s. Raw results: assignment3\data\results\results_a3_threads.csv

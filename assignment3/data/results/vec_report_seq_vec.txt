@@ -7,3 +7,12 @@ assignment3\src\c\a3_kernels.c:68:44: optimized: epilogue loop vectorized using 
 assignment3\src\c\a3_kernels.c:68:44: optimized: loop vectorized using 32 byte vectors and unroll factor 4
 assignment3\src\c\a3_kernels.c:68:44: optimized:  loop versioned for vectorization because of possible aliasing
 assignment3\src\c\a3_kernels.c:68:44: optimized: epilogue loop vectorized using 16 byte vectors and unroll factor 2
+assignment3\src\c\a3_kernels.c:68:44: optimized: loop vectorized using 32 byte vectors and unroll factor 4
+assignment3\src\c\a3_kernels.c:68:44: optimized:  loop versioned for vectorization because of possible aliasing
+assignment3\src\c\a3_kernels.c:68:44: optimized: epilogue loop vectorized using 16 byte vectors and unroll factor 2
+assignment3\src\c\a3_kernels.c:68:44: optimized: loop vectorized using 32 byte vectors and unroll factor 4
+assignment3\src\c\a3_kernels.c:68:44: optimized:  loop versioned for vectorization because of possible aliasing
+assignment3\src\c\a3_kernels.c:68:44: optimized: epilogue loop vectorized using 16 byte vectors and unroll factor 2
+assignment3\src\c\a3_kernels.c:68:44: optimized: loop vectorized using 32 byte vectors and unroll factor 4
+assignment3\src\c\a3_kernels.c:68:44: optimized:  loop versioned for vectorization because of possible aliasing
+assignment3\src\c\a3_kernels.c:68:44: optimized: epilogue loop vectorized using 16 byte vectors and unroll factor 2

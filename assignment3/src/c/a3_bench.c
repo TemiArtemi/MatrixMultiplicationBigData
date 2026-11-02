@@ -32,6 +32,7 @@
 #include "a3_kernels.h"
 #include "a3_validate.h"
 #include "a3_sysinfo.h"
+#include "a3_affinity.h"
 
 #include <windows.h>
 #include <omp.h>
@@ -67,6 +68,13 @@ static int g_reps = A3_MEASURED_REPS;
 static int g_warmups = A3_WARMUP_RUNS;
 static double g_budget = A3_RUN_BUDGET_SEC;
 
+/* Placement policy (see a3_affinity.h): EcoQoS opt-out for the whole run,
+ * and single-thread runs restricted to the performance cores so that the
+ * sequential baseline is measured on the fastest core type. */
+static int g_ecoqos_optout = 1;
+static int g_pin_single_to_pcores = 1;
+static int g_ecoqos_status = 0;
+
 /* ---- CSV helpers -------------------------------------------------------- */
 
 static const char *MEM_METRIC = "peak_rss_working_set_mb";
@@ -76,13 +84,13 @@ static void csv_header(FILE *f) {
                "repetition_id,threads_or_workers,density,execution_time_ms,"
                "memory_metric_name,memory_value_mb,checksum,status,variant,"
                "simd,schedule,row_tile,block_size,experiment,"
-               "theoretical_storage_mb\n");
+               "theoretical_storage_mb,placement\n");
 }
 
 static void csv_row(FILE *f, const char *experiment, const KernelVariant *v,
                     int n, int rep_id, int p, double time_ms, double peak_mb,
                     double checksum, const char *status, int row_tile,
-                    int block) {
+                    int block, const char *placement) {
     double storage_mb = 3.0 * 8.0 * (double)n * (double)n / (1024.0 * 1024.0);
     fprintf(f, "3,%s,C,%d,float64,%u,%d,%d,%d,100.0000,", v->name, n, A3_SEED,
             g_warmups, rep_id, p);
@@ -90,10 +98,10 @@ static void csv_row(FILE *f, const char *experiment, const KernelVariant *v,
         fprintf(f, "%.4f", time_ms);
     }
     /* TIMEOUT: execution_time_ms stays empty (no invented time). */
-    fprintf(f, ",%s,%.3f,%.6e,%s,%s,%s,%s,%d,%d,%s,%.4f\n", MEM_METRIC,
+    fprintf(f, ",%s,%.3f,%.6e,%s,%s,%s,%s,%d,%d,%s,%.4f,%s\n", MEM_METRIC,
             peak_mb, checksum, status, v->variant, v->simd,
             v->threaded ? "dynamic_1" : "none", row_tile, block, experiment,
-            storage_mb);
+            storage_mb, placement);
     fflush(f);
 }
 
@@ -165,6 +173,13 @@ static int run_config(FILE *out, const char *experiment, const KernelVariant *v,
     int threads = v->threaded ? p : 1;
     omp_set_num_threads(threads);
 
+    const char *placement = "all_cores";
+    if (threads == 1 && g_pin_single_to_pcores && a3_restrict_to_pcores() > 0) {
+        placement = "pcores_only";
+    } else {
+        a3_allow_all_cores();
+    }
+
     for (int rep = 0; rep <= g_reps; rep++) {
         if (rep == 0 && g_warmups == 0) continue;
         int runs = (rep == 0) ? g_warmups : 1;
@@ -172,7 +187,8 @@ static int run_config(FILE *out, const char *experiment, const KernelVariant *v,
             RunResult r = run_once(v, A, B, C, row_tile, block);
             const char *status = r.completed ? "OK" : "TIMEOUT";
             csv_row(out, experiment, v, n, rep, threads, r.time_ms, r.peak_mb,
-                    r.completed ? dm_trace(C) : 0.0, status, row_tile, block);
+                    r.completed ? dm_trace(C) : 0.0, status, row_tile, block,
+                    placement);
             if (rep == 0) {
                 printf("   %-16s p=%-3d warm-up: %s (%.2f ms)\n", v->name,
                        threads, status, r.time_ms);
@@ -326,6 +342,8 @@ static void print_usage(void) {
     printf("  --budget <sec>           per-run watchdog budget (default %.0f)\n",
            A3_RUN_BUDGET_SEC);
     printf("  --sysinfo                print the runtime fingerprint and exit\n");
+    printf("  --no-ecoqos-optout       keep Windows EcoQoS power throttling\n");
+    printf("  --single-thread-any-core do not restrict 1-thread runs to P-cores\n");
     printf("  --dump-result <n> <p> <file>  run tiled_par_vec with p threads on\n"
            "                           A_n x B_n and save C (NumPy cross-check)\n");
 }
@@ -389,6 +407,10 @@ int main(int argc, char *argv[]) {
             dump_n = atoi(argv[++i]);
             dump_p = atoi(argv[++i]);
             dump_path = argv[++i];
+        } else if (strcmp(argv[i], "--no-ecoqos-optout") == 0) {
+            g_ecoqos_optout = 0;
+        } else if (strcmp(argv[i], "--single-thread-any-core") == 0) {
+            g_pin_single_to_pcores = 0;
         } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             print_usage();
             return 0;
@@ -401,6 +423,7 @@ int main(int argc, char *argv[]) {
 
     /* Thread counts are controlled explicitly: no dynamic adjustment. */
     omp_set_dynamic(0);
+    if (g_ecoqos_optout) g_ecoqos_status = a3_disable_power_throttling();
 
     if (sysinfo_only) {
         a3_write_sysinfo(stdout);
@@ -411,6 +434,9 @@ int main(int argc, char *argv[]) {
     printf("Warm-up runs: %d | Measured reps: %d | Per-run budget: %.0f s | "
            "Tiles: %d rows x %d\n",
            g_warmups, g_reps, g_budget, g_row_tile, g_block);
+    printf("EcoQoS opt-out: %s | 1-thread runs on P-cores only: %s\n",
+           g_ecoqos_optout ? (g_ecoqos_status ? "on" : "FAILED") : "off",
+           g_pin_single_to_pcores ? "yes" : "no");
 
     if (user_matrices_dir) g_matrix_dirs[g_matrix_dirs_count++] = user_matrices_dir;
     g_matrix_dirs[g_matrix_dirs_count++] = A3_MATRICES_DIR_A3;
@@ -458,6 +484,10 @@ int main(int argc, char *argv[]) {
     if (info) {
         fprintf(info, "key,value\n");
         a3_write_sysinfo(info);
+        fprintf(info, "ecoqos_optout,%s\n",
+                g_ecoqos_optout ? (g_ecoqos_status ? "on" : "failed") : "off");
+        fprintf(info, "single_thread_runs_on_pcores_only,%d\n",
+                g_pin_single_to_pcores);
         fclose(info);
     }
     a3_write_sysinfo(stdout);

@@ -1,0 +1,26 @@
+key,value
+physical_cores,20
+logical_processors,28
+performance_cores,8
+performance_logical_processors,16
+efficiency_cores,12
+efficiency_logical_processors,12
+openmp_version,202111
+omp_num_procs,28
+omp_max_threads_default,56
+omp_dynamic,0
+omp_proc_bind,false
+omp_num_places,0
+env_OMP_NUM_THREADS,(unset)
+env_OMP_DYNAMIC,(unset)
+env_OMP_PROC_BIND,(unset)
+env_OMP_PLACES,(unset)
+env_OMP_WAIT_POLICY,(unset)
+env_OPENBLAS_NUM_THREADS,(unset)
+env_MKL_NUM_THREADS,(unset)
+target_avx2,1
+target_fma,1
+target_avx512f,0
+compiler,gcc 16.2.0
+ecoqos_optout,off
+single_thread_runs_on_pcores_only,0

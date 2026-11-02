@@ -29,7 +29,7 @@
  * Rectangular tiles: BI rows (the unit of parallel work) x BKJ columns of
  * the k and j dimensions. BKJ = 512 is the value tuned in Assignment 2; BI
  * is chosen with a short tuning sweep (see README and report). */
-#define A3_DEFAULT_ROW_TILE 32  /* tuned: see results_a3_tune.csv */
+#define A3_DEFAULT_ROW_TILE 16  /* tuned: see results_a3_tune.csv */
 #define A3_DEFAULT_BLOCK    512
 
 /* ---- Default data locations (relative to the repository root) -------- */
