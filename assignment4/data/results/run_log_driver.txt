@@ -1,0 +1,17 @@
+﻿Active power plan: GUID de plan de energía: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (Alto rendimiento)
+Built assignment4\src\c\a4_bench.exe
+Baselines: assignment3\src\c\a3_bench.exe --experiment threads --sizes 1000 2000 3000 4000 --threads 1 2 4 8 16 28 
+--reps 5 --out assignment4\data\results\baseline_a3_threads.csv
+start-up p=1 done
+start-up p=2 done
+start-up p=4 done
+start-up p=8 done
+start-up p=16 done
+start-up p=28 done
+=== p = 1 ranks ===
+=== p = 2 ranks ===
+=== p = 4 ranks ===
+=== p = 8 ranks ===
+=== p = 16 ranks ===
+=== p = 28 ranks ===
+Done. Raw results: assignment4\data\results\results_a4_scaling.csv

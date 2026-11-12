@@ -1,0 +1,7 @@
+assignment,experiment,partitioner,workers,n,max_abs_diff,bitwise_equal,status
+4,probe_block256,mpi_rowblock,8,2000,0.000000e+00,1,OK
+4,probe_block256,mpi_rowblock,8,4000,0.000000e+00,1,OK
+4,probe_block256,mpi_rowblock,16,2000,0.000000e+00,1,OK
+4,probe_block256,mpi_rowblock,16,4000,0.000000e+00,1,OK
+4,probe_block256,mpi_rowblock,28,2000,0.000000e+00,1,OK
+4,probe_block256,mpi_rowblock,28,4000,0.000000e+00,1,OK

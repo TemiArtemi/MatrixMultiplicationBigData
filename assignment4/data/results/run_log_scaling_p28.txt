@@ -1,0 +1,47 @@
+﻿Assignment 4 benchmark harness (C + MPI)
+Ranks (workers): 28 | Warm-up runs: 1 | Measured reps: 5 | Per-run budget: 120 s | Tiles: 16 rows x 512
+EcoQoS opt-out (rank 0): on | p = 1 on P-cores only: no
+============================================================
+CORRECTNESS VALIDATION (Assignment 4, mpi_rowblock, p = 28 ranks)
+============================================================
+43 checks, 0 failures -> ALL CORRECTNESS TESTS PASSED
+Results file: assignment4\data\results\results_a4_scaling.csv
+Cross-check log: assignment4\data\results\results_a4_scaling_crosscheck.csv
+
+--- n = 1000, p = 28 ranks ---
+   warm-up: OK (total 56.49 ms)
+   rep 1: OK total 49.80 ms = scatter 1.43 + bcast 7.24 + compute 39.88 + gather 1.25 (kernel min/max 28.53/39.87), mem sum 503 MB
+   rep 2: OK total 49.91 ms = scatter 3.12 + bcast 7.25 + compute 38.29 + gather 1.26 (kernel min/max 29.07/38.28), mem sum 504 MB
+   rep 3: OK total 49.97 ms = scatter 1.35 + bcast 6.74 + compute 40.67 + gather 1.21 (kernel min/max 29.04/40.66), mem sum 504 MB
+   rep 4: OK total 49.94 ms = scatter 1.35 + bcast 6.78 + compute 39.82 + gather 1.99 (kernel min/max 28.26/39.77), mem sum 505 MB
+   rep 5: OK total 48.24 ms = scatter 1.37 + bcast 6.55 + compute 39.09 + gather 1.23 (kernel min/max 29.17/39.04), mem sum 505 MB
+   cross-check p=28 vs single-rank kernel: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 2000, p = 28 ranks ---
+   warm-up: OK (total 347.30 ms)
+   rep 1: OK total 329.05 ms = scatter 5.36 + bcast 34.89 + compute 281.49 + gather 7.31 (kernel min/max 233.22/281.37), mem sum 1263 MB
+   rep 2: OK total 333.71 ms = scatter 5.96 + bcast 33.72 + compute 289.78 + gather 4.26 (kernel min/max 244.16/289.65), mem sum 1263 MB
+   rep 3: OK total 325.21 ms = scatter 5.06 + bcast 34.15 + compute 277.97 + gather 8.04 (kernel min/max 228.02/277.83), mem sum 1263 MB
+   rep 4: OK total 338.82 ms = scatter 5.44 + bcast 34.84 + compute 289.37 + gather 9.16 (kernel min/max 244.00/289.32), mem sum 1263 MB
+   rep 5: OK total 382.52 ms = scatter 6.73 + bcast 34.82 + compute 333.46 + gather 7.50 (kernel min/max 285.58/333.33), mem sum 1264 MB
+   cross-check p=28 vs single-rank kernel: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 3000, p = 28 ranks ---
+   warm-up: OK (total 1049.74 ms)
+   rep 1: OK total 1035.53 ms = scatter 12.33 + bcast 77.42 + compute 935.92 + gather 9.86 (kernel min/max 823.46/935.91), mem sum 2520 MB
+   rep 2: OK total 1039.26 ms = scatter 11.84 + bcast 79.24 + compute 938.02 + gather 10.16 (kernel min/max 816.04/937.84), mem sum 2520 MB
+   rep 3: OK total 1189.30 ms = scatter 12.17 + bcast 80.59 + compute 1083.25 + gather 13.29 (kernel min/max 909.26/1083.00), mem sum 2520 MB
+   rep 4: OK total 1214.43 ms = scatter 14.84 + bcast 87.32 + compute 1100.89 + gather 11.39 (kernel min/max 935.78/1100.80), mem sum 2520 MB
+   rep 5: OK total 1228.93 ms = scatter 18.64 + bcast 91.54 + compute 1107.45 + gather 11.30 (kernel min/max 928.75/1104.85), mem sum 2520 MB
+   cross-check p=28 vs single-rank kernel: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 4000, p = 28 ranks ---
+   warm-up: OK (total 2519.05 ms)
+   rep 1: OK total 2600.49 ms = scatter 17.88 + bcast 144.73 + compute 2417.04 + gather 20.84 (kernel min/max 2090.86/2416.83), mem sum 4274 MB
+   rep 2: OK total 2775.55 ms = scatter 24.27 + bcast 149.18 + compute 2584.85 + gather 17.25 (kernel min/max 2265.72/2582.31), mem sum 4274 MB
+   rep 3: OK total 2807.59 ms = scatter 23.12 + bcast 155.39 + compute 2610.73 + gather 18.35 (kernel min/max 2278.20/2614.06), mem sum 4274 MB
+   rep 4: OK total 2810.52 ms = scatter 21.87 + bcast 152.72 + compute 2616.62 + gather 19.30 (kernel min/max 2260.41/2616.42), mem sum 4274 MB
+   rep 5: OK total 2806.76 ms = scatter 21.03 + bcast 149.56 + compute 2617.28 + gather 18.89 (kernel min/max 2295.04/2617.07), mem sum 4274 MB
+   cross-check p=28 vs single-rank kernel: max |diff| = 0.000e+00, bitwise yes [OK]
+
+Benchmark finished in 47.1 s (p = 28).

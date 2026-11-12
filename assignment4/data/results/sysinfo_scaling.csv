@@ -1,0 +1,16 @@
+key,value
+physical_cores,20
+logical_processors,28
+performance_cores,8
+performance_logical_processors,16
+efficiency_cores,12
+efficiency_logical_processors,12
+mpi_standard_version,2.0
+mpi_library_version,Microsoft MPI 10.1.12498.52
+env_OMP_NUM_THREADS,(unset)
+openmp_linked,0
+target_avx2,1
+target_fma,1
+target_avx512f,0
+compiler,gcc 16.2.0
+powerplan,GUID de plan de energ?a: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (Alto rendimiento)

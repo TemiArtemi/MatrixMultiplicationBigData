@@ -1,0 +1,25 @@
+﻿Assignment 4 benchmark harness (C + MPI)
+Ranks (workers): 8 | Warm-up runs: 1 | Measured reps: 3 | Per-run budget: 120 s | Tiles: 16 rows x 256
+EcoQoS opt-out (rank 0): on | p = 1 on P-cores only: no
+============================================================
+CORRECTNESS VALIDATION (Assignment 4, mpi_rowblock, p = 8 ranks)
+============================================================
+43 checks, 0 failures -> ALL CORRECTNESS TESTS PASSED
+Results file: assignment4\data\results\results_a4_probe_block256.csv
+Cross-check log: assignment4\data\results\results_a4_probe_block256_crosscheck.csv
+
+--- n = 2000, p = 8 ranks ---
+   warm-up: OK (total 145.62 ms)
+   rep 1: OK total 130.98 ms = scatter 2.98 + bcast 11.92 + compute 112.93 + gather 3.15 (kernel min/max 106.09/112.92), mem sum 460 MB
+   rep 2: OK total 133.38 ms = scatter 3.12 + bcast 13.45 + compute 113.87 + gather 2.94 (kernel min/max 104.30/113.89), mem sum 460 MB
+   rep 3: OK total 134.19 ms = scatter 2.93 + bcast 12.09 + compute 115.69 + gather 3.47 (kernel min/max 102.64/115.68), mem sum 460 MB
+   cross-check p=8 vs single-rank kernel: max |diff| = 0.000e+00, bitwise yes [OK]
+
+--- n = 4000, p = 8 ranks ---
+   warm-up: OK (total 1034.47 ms)
+   rep 1: OK total 977.43 ms = scatter 13.38 + bcast 50.95 + compute 900.98 + gather 12.12 (kernel min/max 851.97/900.96), mem sum 1628 MB
+   rep 2: OK total 980.84 ms = scatter 12.95 + bcast 50.21 + compute 905.77 + gather 11.92 (kernel min/max 828.01/905.81), mem sum 1628 MB
+   rep 3: OK total 990.46 ms = scatter 12.86 + bcast 52.28 + compute 913.43 + gather 11.90 (kernel min/max 864.20/913.41), mem sum 1628 MB
+   cross-check p=8 vs single-rank kernel: max |diff| = 0.000e+00, bitwise yes [OK]
+
+Benchmark finished in 17.3 s (p = 8).
