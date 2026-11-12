@@ -76,7 +76,7 @@ static void csv_header(FILE *f) {
                "partitioner,row_tile,block_size,t_scatter_ms,t_bcast_ms,"
                "t_compute_ms,t_gather_ms,t_kernel_min_ms,t_kernel_max_ms,"
                "mem_rank0_mb,mem_max_nonroot_mb,placement,experiment,"
-               "theoretical_storage_mb\n");
+               "theoretical_storage_mb,t_load_ms\n");
 }
 
 typedef struct {
@@ -87,7 +87,7 @@ typedef struct {
 
 static void csv_row(FILE *f, int n, int rep_id, const RunResult *r,
                     double checksum, double storage_mb,
-                    const char *placement) {
+                    const char *placement, double load_ms) {
     fprintf(f, "4,%s,C,%d,float64,%u,%d,%d,%d,100.0000,", g_partitioner, n,
             A4_SEED, g_warmups, rep_id, g_size);
     if (r->completed) {
@@ -105,8 +105,9 @@ static void csv_row(FILE *f, int n, int rep_id, const RunResult *r,
     } else {
         fprintf(f, ",,,,,");
     }
-    fprintf(f, ",%.3f,%.3f,%s,%s,%.4f\n", r->mem_root, r->mem_max_nonroot,
-            placement, g_experiment, storage_mb);
+    /* t_load_ms: rank-0 CSV loading of A_n and B_n, OUTSIDE the boundary. */
+    fprintf(f, ",%.3f,%.3f,%s,%s,%.4f,%.1f\n", r->mem_root, r->mem_max_nonroot,
+            placement, g_experiment, storage_mb, load_ms);
     fflush(f);
 }
 
@@ -186,10 +187,13 @@ static void run_scaling(const Partitioner *part, FILE *out) {
         int n = g_sizes[si];
         DenseMatrix *A = NULL, *B = NULL, *C = NULL, *ref = NULL;
         int ready = 1;
+        double load_ms = 0.0;
         if (g_rank == 0) {
             printf("\n--- n = %d, p = %d ranks ---\n", n, g_size);
+            double l0 = a4_time_sec();
             A = load_ab(n, 'A');
             B = load_ab(n, 'B');
+            load_ms = (a4_time_sec() - l0) * 1000.0;
             C = (A && B) ? dm_alloc(n) : NULL;
             ref = (C && g_reference) ? dm_alloc(n) : NULL;
             if (!A || !B) {
@@ -227,7 +231,7 @@ static void run_scaling(const Partitioner *part, FILE *out) {
                 RunResult r = run_once(part, ctx, A, B, C);
                 if (g_rank == 0) {
                     csv_row(out, n, rep, &r, r.completed ? dm_trace(C) : 0.0,
-                            storage_mb, placement);
+                            storage_mb, placement, load_ms);
                     if (rep == 0) {
                         printf("   warm-up: %s (total %.2f ms)\n",
                                r.completed ? "OK" : "TIMEOUT",
